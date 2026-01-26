@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Color Tokens */
+    --color-primary: #1a1f37;
+    --color-primary-light: #2d3548;
+    --color-primary-dark: #0f1220;
+    
+    /* Spacing */
+    --spacing-base: 1rem;
+    
+    /* Transitions */
+    --transition-fast: 150ms;
+    --transition-normal: 200ms;
+    --transition-slow: 300ms;
+  }
+
+  .dark {
+    --color-bg-primary: #0F1117;
+    --color-bg-secondary: #1a1f37;
+    --color-bg-tertiary: #252b42;
+    --color-bg-elevated: #2d3548;
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #D1D5DB;
+    --color-text-tertiary: #9CA3AF;
+    --color-border: #374151;
+  }
+
+  * {
+    @apply border-gray-200 dark:border-dark-border;
+  }
+
+  body {
+    @apply bg-gray-50 dark:bg-dark-bg-primary text-gray-900 dark:text-dark-text-primary;
+    @apply font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Button Base Styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-accent-blue text-white hover:bg-indigo-700;
+    @apply focus:ring-accent-blue;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border-2 border-accent-blue text-accent-blue;
+    @apply hover:bg-accent-blue hover:text-white;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-gray-700 dark:text-dark-text-primary;
+    @apply hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary;
+  }
+
+  /* Input Styles */
+  .input-field {
+    @apply w-full h-11 px-4 rounded-md border border-gray-300 dark:border-dark-border;
+    @apply bg-white dark:bg-dark-bg-elevated;
+    @apply text-gray-900 dark:text-dark-text-primary;
+    @apply placeholder:text-gray-400 dark:placeholder:text-dark-text-tertiary;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue;
+    @apply transition-all duration-200;
+  }
+
+  /* Card Styles */
+  .card {
+    @apply bg-white dark:bg-dark-bg-elevated rounded-xl p-6;
+    @apply border border-gray-200 dark:border-dark-border;
+    @apply shadow-sm;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
