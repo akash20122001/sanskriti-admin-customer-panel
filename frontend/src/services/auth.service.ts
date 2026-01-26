@@ -28,8 +28,11 @@ export const authService = {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    const userId = credentials.userId.trim();
+    const password = credentials.password; // Don't trim password usually, but for simple mocks maybe? No, passwords can end in space.
+
     // Admin Login
-    if (credentials.userId === 'admin' && credentials.password === 'admin123') {
+    if (userId === 'admin' && password === 'admin123') {
       const response: AuthResponse = {
         user: MOCK_ADMIN,
         accessToken: 'mock_admin_token',
