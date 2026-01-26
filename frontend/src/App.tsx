@@ -1,8 +1,14 @@
 import './index.css';
-import ComponentDemo from './pages/ComponentDemo';
+import AppRouter from './router';
+import { Toaster } from 'sonner';
 
 function App() {
-  return <ComponentDemo />;
+  return (
+    <>
+      <AppRouter />
+      <Toaster richColors position="bottom-right" />
+    </>
+  );
 }
 
 export default App;
