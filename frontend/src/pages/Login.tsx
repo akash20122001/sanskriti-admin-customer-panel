@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,7 +23,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import { ShieldCheck, Clock } from 'lucide-react';
+import { ShieldCheck, Clock, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({
     userId: z.string().min(3, 'User ID must be at least 3 characters'),
@@ -35,6 +36,7 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { login, isLoading } = useAuthStore();
+    const [showPassword, setShowPassword] = useState(false);
 
     // Get redirect path or default to appropriate dashboard
     const from = location.state?.from?.pathname;
@@ -147,12 +149,30 @@ export default function LoginPage() {
                                         <FormItem>
                                             <FormLabel>Password</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="password"
-                                                    placeholder="Enter your password"
-                                                    className="h-12"
-                                                    {...field}
-                                                />
+                                                <div className="relative">
+                                                    <Input
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        placeholder="Enter your password"
+                                                        className="h-12 pr-10"
+                                                        {...field}
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="absolute right-0 top-0 h-10 w-10 px-3 py-2 hover:bg-transparent"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff className="h-4 w-4 text-gray-400" />
+                                                        ) : (
+                                                            <Eye className="h-4 w-4 text-gray-400" />
+                                                        )}
+                                                        <span className="sr-only">
+                                                            {showPassword ? 'Hide password' : 'Show password'}
+                                                        </span>
+                                                    </Button>
+                                                </div>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -161,7 +181,7 @@ export default function LoginPage() {
 
                                 <Button
                                     type="submit"
-                                    className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary-light"
+                                    className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary-light text-white"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? 'Signing In...' : 'Sign In'}
