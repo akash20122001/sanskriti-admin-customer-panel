@@ -7,7 +7,8 @@
     "dev": "tsx watch src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js",
-    "postinstall": "prisma generate && prisma migrate deploy",
+    "migrate": "prisma migrate deploy",
+    "start:migrate": "prisma migrate deploy && node dist/app.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"
