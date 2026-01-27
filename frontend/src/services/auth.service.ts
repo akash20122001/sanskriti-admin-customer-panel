@@ -1,59 +1,86 @@
 import type { LoginCredentials, AuthResponse, User } from '@/types';
 
-// Mock user for development
-const MOCK_ADMIN: User = {
-  id: '1',
-  userId: 'admin',
-  name: 'Admin User',
-  role: 'ADMIN',
-  walletBalance: 0,
-  isActive: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
-const MOCK_CUSTOMER: User = {
-  id: '2',
-  userId: 'test_user',
-  name: 'Test Customer',
-  role: 'CUSTOMER',
-  walletBalance: 5000,
-  isActive: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: credentials.userId.trim(),
+          password: credentials.password,
+        }),
+      });
 
-    const userId = credentials.userId.trim();
-    const password = credentials.password; // Don't trim password usually, but for simple mocks maybe? No, passwords can end in space.
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Login failed');
+      }
 
-    // Admin Login
-    if (userId === 'admin' && password === 'admin123') {
-      const response: AuthResponse = {
-        user: MOCK_ADMIN,
-        accessToken: 'mock_admin_token',
-        refreshToken: 'mock_admin_refresh',
-      };
-      this.setSession(response);
-      return response;
+      const data: AuthResponse = await response.json();
+      this.setSession(data);
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to connect to server');
     }
+  },
 
-    // Customer Login
-    if (credentials.userId === 'test_user' && credentials.password === 'password123') {
-      const response: AuthResponse = {
-        user: MOCK_CUSTOMER,
-        accessToken: 'mock_customer_token',
-        refreshToken: 'mock_customer_refresh',
-      };
-      this.setSession(response);
-      return response;
+  async register(userData: { userId: string; name: string; password: string; role?: 'ADMIN' | 'CUSTOMER' }): Promise<AuthResponse> {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Registration failed');
+      }
+
+      const data: AuthResponse = await response.json();
+      this.setSession(data);
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to connect to server');
     }
+  },
 
-    throw new Error('Invalid credentials');
+  async getCurrentUser(): Promise<User | null> {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const response = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        this.logout();
+        return null;
+      }
+
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      console.error('Failed to get current user:', error);
+      this.logout();
+      return null;
+    }
   },
 
   logout() {
@@ -70,3 +97,4 @@ export const authService = {
     return localStorage.getItem('accessToken');
   }
 };
+
