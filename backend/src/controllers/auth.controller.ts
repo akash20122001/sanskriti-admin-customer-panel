@@ -20,17 +20,21 @@ interface RegisterRequest {
 const generateTokens = (userId: string, id: string) => {
     const jwtSecret = process.env.JWT_SECRET || 'secret';
     const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret';
+    const jwtExpiry = process.env.JWT_EXPIRES_IN || '7d';
+    const refreshExpiry = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
 
+    // @ts-expect-error - jsonwebtoken types incorrectly reject string expiresIn in strict mode
     const accessToken = jwt.sign(
         { userId, id },
         jwtSecret,
-        { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as string }
+        { expiresIn: jwtExpiry }
     );
 
+    // @ts-expect-error - jsonwebtoken types incorrectly reject string expiresIn in strict mode
     const refreshToken = jwt.sign(
         { userId, id },
         refreshSecret,
-        { expiresIn: (process.env.REFRESH_TOKEN_EXPIRES_IN || '30d') as string }
+        { expiresIn: refreshExpiry }
     );
 
     return { accessToken, refreshToken };
