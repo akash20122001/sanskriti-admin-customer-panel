@@ -18,27 +18,33 @@ interface RegisterRequest {
 }
 
 const generateTokens = (userId: string, id: string) => {
+    const jwtSecret = (process.env.JWT_SECRET || 'secret') as string;
+    const jwtExpiry = (process.env.JWT_EXPIRES_IN || '7d') as string;
+    const refreshSecret = (process.env.REFRESH_TOKEN_SECRET || 'refresh-secret') as string;
+    const refreshExpiry = (process.env.REFRESH_TOKEN_EXPIRES_IN || '30d') as string;
+
     const accessToken = jwt.sign(
         { userId, id },
-        process.env.JWT_SECRET || 'secret',
-        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+        jwtSecret,
+        { expiresIn: jwtExpiry }
     );
 
     const refreshToken = jwt.sign(
         { userId, id },
-        process.env.REFRESH_TOKEN_SECRET || 'refresh-secret',
-        { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '30d' }
+        refreshSecret,
+        { expiresIn: refreshExpiry }
     );
 
     return { accessToken, refreshToken };
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, password } = req.body as LoginRequest;
 
         if (!userId || !password) {
-            return res.status(400).json({ error: 'User ID and password are required' });
+            res.status(400).json({ error: 'User ID and password are required' });
+            return;
         }
 
         // Find user by userId
@@ -47,18 +53,21 @@ export const login = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
         }
 
         // Check if user is active
         if (!user.isActive) {
-            return res.status(403).json({ error: 'Account is inactive' });
+            res.status(403).json({ error: 'Account is inactive' });
+            return;
         }
 
         // Verify password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
         }
 
         // Generate tokens
@@ -78,12 +87,13 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, name, password, role } = req.body as RegisterRequest;
 
         if (!userId || !name || !password) {
-            return res.status(400).json({ error: 'User ID, name, and password are required' });
+            res.status(400).json({ error: 'User ID, name, and password are required' });
+            return;
         }
 
         // Check if user already exists
@@ -92,7 +102,8 @@ export const register = async (req: Request, res: Response) => {
         });
 
         if (existingUser) {
-            return res.status(409).json({ error: 'User ID already exists' });
+            res.status(409).json({ error: 'User ID already exists' });
+            return;
         }
 
         // Hash password
@@ -127,7 +138,7 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-export const me = async (req: Request, res: Response) => {
+export const me = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).userId; // Set by auth middleware
 
@@ -136,7 +147,8 @@ export const me = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: 'User not found' });
+            return;
         }
 
         const { password: _, ...userWithoutPassword } = user;
