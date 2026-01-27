@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -21,24 +21,16 @@ const generateTokens = (userId: string, id: string) => {
     const jwtSecret = process.env.JWT_SECRET || 'secret';
     const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret';
 
-    const accessTokenOptions: SignOptions = {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-    };
-
-    const refreshTokenOptions: SignOptions = {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '30d'
-    };
-
     const accessToken = jwt.sign(
         { userId, id },
         jwtSecret,
-        accessTokenOptions
+        { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as string }
     );
 
     const refreshToken = jwt.sign(
         { userId, id },
         refreshSecret,
-        refreshTokenOptions
+        { expiresIn: (process.env.REFRESH_TOKEN_EXPIRES_IN || '30d') as string }
     );
 
     return { accessToken, refreshToken };
