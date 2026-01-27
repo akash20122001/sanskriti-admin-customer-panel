@@ -2,9 +2,11 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import LoginPage from '@/pages/Login';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ComponentDemo from '@/pages/ComponentDemo';
+import AdminLayout from '@/layouts/AdminLayout';
+import AdminDashboard from '@/pages/admin/Dashboard';
+import UsersPage from '@/pages/admin/Users';
 
 // Placeholder components for future implementation
-const AdminDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Admin Dashboard</h1></div>;
 const CustomerDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Customer Dashboard</h1></div>;
 const Unauthorized = () => (
     <div className="h-screen flex items-center justify-center">
@@ -39,10 +41,22 @@ const router = createBrowserRouter([
         element: <ProtectedRoute allowedRoles={['ADMIN']} />,
         children: [
             {
-                path: 'dashboard',
-                element: <AdminDashboard />,
+                element: <AdminLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminDashboard />,
+                    },
+                    {
+                        path: 'dashboard',
+                        element: <AdminDashboard />,
+                    },
+                    {
+                        path: 'users',
+                        element: <UsersPage />,
+                    },
+                ],
             },
-            // Add more admin routes here
         ],
     },
 
