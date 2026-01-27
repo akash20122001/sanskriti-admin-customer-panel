@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 interface JwtPayload {
     userId: string;
     id: string;
+    role: string;
 }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
@@ -21,9 +22,18 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
         (req as any).userId = decoded.id;
         (req as any).userIdString = decoded.userId;
+        (req as any).userRole = decoded.role;
         next();
     } catch (error) {
         res.status(403).json({ error: 'Invalid or expired token' });
         return;
     }
+};
+
+export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
+    if ((req as any).userRole !== 'ADMIN') {
+        res.status(403).json({ error: 'Admin access required' });
+        return;
+    }
+    next();
 };

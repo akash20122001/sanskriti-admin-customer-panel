@@ -17,22 +17,26 @@ interface RegisterRequest {
     role?: 'ADMIN' | 'CUSTOMER';
 }
 
-const generateTokens = (userId: string, id: string) => {
+const generateTokens = (userId: string, id: string, role: string) => {
     const jwtSecret = process.env.JWT_SECRET || 'secret';
     const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret';
     const jwtExpiry = process.env.JWT_EXPIRES_IN || '7d';
     const refreshExpiry = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
 
-    // @ts-expect-error - jsonwebtoken types incorrectly reject string expiresIn in strict mode
+    const tokenPayload = {
+        userId,
+        id,
+        role
+    };
+
     const accessToken = jwt.sign(
-        { userId, id },
+        tokenPayload,
         jwtSecret,
         { expiresIn: jwtExpiry }
     );
 
-    // @ts-expect-error - jsonwebtoken types incorrectly reject string expiresIn in strict mode
     const refreshToken = jwt.sign(
-        { userId, id },
+        tokenPayload,
         refreshSecret,
         { expiresIn: refreshExpiry }
     );
@@ -73,7 +77,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
 
         // Generate tokens
-        const { accessToken, refreshToken } = generateTokens(user.userId, user.id);
+        const { accessToken, refreshToken } = generateTokens(user.userId, user.id, user.role);
 
         // Return user data (without password)
         const { password: _, ...userWithoutPassword } = user;
@@ -124,7 +128,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         });
 
         // Generate tokens
-        const { accessToken, refreshToken } = generateTokens(newUser.userId, newUser.id);
+        const { accessToken, refreshToken } = generateTokens(newUser.userId, newUser.id, newUser.role);
 
         // Return user data (without password)
         const { password: _, ...userWithoutPassword } = newUser;
