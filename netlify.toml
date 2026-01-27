@@ -1,0 +1,15 @@
+[build]
+  base = "frontend"
+  publish = "dist"
+  command = "npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.qa.environment]
+  VITE_API_URL = "https://sanskriti-admin-customer-panel-production.up.railway.app/api"
+
+[context.production.environment]
+  VITE_API_URL = "https://sanskriti-admin-customer-panel-production.up.railway.app/api"
