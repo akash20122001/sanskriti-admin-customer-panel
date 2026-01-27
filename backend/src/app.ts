@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import { seedDatabase } from './controllers/seed.controller';
 
 dotenv.config();
 
@@ -18,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+
+// Temporary seed endpoint (remove after initial setup)
+app.post('/api/seed', seedDatabase);
 
 // Health check
 app.get('/api/health', (_req: Request, res: Response) => {
