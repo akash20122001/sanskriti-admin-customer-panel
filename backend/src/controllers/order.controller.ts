@@ -1,8 +1,14 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { nanoid } from 'nanoid';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
+
+// Generate unique order ID
+function generateOrderId(): string {
+    const randomStr = crypto.randomBytes(5).toString('hex').toUpperCase();
+    return `ORD-${randomStr}`;
+}
 
 export const orderController = {
     // Get all orders (admin only)
@@ -64,7 +70,7 @@ export const orderController = {
             }
 
             // Generate unique order ID
-            const orderId = `ORD-${nanoid(10).toUpperCase()}`;
+            const orderId = generateOrderId();
 
             const order = await prisma.order.create({
                 data: {
