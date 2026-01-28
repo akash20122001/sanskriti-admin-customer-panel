@@ -28,3 +28,30 @@ enum Role {
   ADMIN
   CUSTOMER
 }
+
+model Order {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  userId    String
+  skuId     String
+  price     Float
+  currency  Currency
+  platform  Platform
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([orderId])
+}
+
+enum Currency {
+  USD
+  INR
+}
+
+enum Platform {
+  Amazon
+  Flipkart
+  Meesho
+  Etsy
+}

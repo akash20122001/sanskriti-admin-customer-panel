@@ -25,16 +25,19 @@ export interface AuthResponse {
 }
 
 // Order Types
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
+export type Currency = 'USD' | 'INR';
+export type Platform = 'Amazon' | 'Flipkart' | 'Meesho' | 'Etsy';
 
 export interface Order {
     id: string;
-    orderNumber: string;
+    orderId: string;
     userId: string;
-    userName?: string;
-    totalAmount: number;
-    status: OrderStatus;
+    skuId: string;
+    price: number;
+    currency: Currency;
+    platform: Platform;
     createdAt: string;
+    updatedAt: string;
 }
 
 // Transaction Types
