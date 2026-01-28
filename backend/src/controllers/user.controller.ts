@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export const userController = {
     // Get all users (admin only)
-    async getAllUsers(req: Request, res: Response) {
+    async getAllUsers(_req: Request, res: Response): Promise<any> {
         try {
             const users = await prisma.user.findMany({
                 select: {
@@ -32,9 +32,9 @@ export const userController = {
     },
 
     // Get single user by ID (admin only)
-    async getUserById(req: Request, res: Response) {
+    async getUserById(req: Request, res: Response): Promise<any> {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
 
             const user = await prisma.user.findUnique({
                 where: { id },
@@ -62,7 +62,7 @@ export const userController = {
     },
 
     // Create new user (admin only)
-    async createUser(req: Request, res: Response) {
+    async createUser(req: Request, res: Response): Promise<any> {
         try {
             const { userId, name, password, role, walletBalance, isActive } = req.body;
 
@@ -113,9 +113,9 @@ export const userController = {
     },
 
     // Update user (admin only)
-    async updateUser(req: Request, res: Response) {
+    async updateUser(req: Request, res: Response): Promise<any> {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
             const { userId, name, password, role, walletBalance, isActive } = req.body;
 
             // Check if user exists
@@ -171,9 +171,9 @@ export const userController = {
     },
 
     // Delete user (admin only)
-    async deleteUser(req: Request, res: Response) {
+    async deleteUser(req: Request, res: Response): Promise<any> {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
 
             // Check if user exists
             const existingUser = await prisma.user.findUnique({

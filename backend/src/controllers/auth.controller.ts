@@ -32,13 +32,13 @@ const generateTokens = (userId: string, id: string, role: string) => {
     const accessToken = jwt.sign(
         tokenPayload,
         jwtSecret,
-        { expiresIn: jwtExpiry }
+        { expiresIn: jwtExpiry } as jwt.SignOptions
     );
 
     const refreshToken = jwt.sign(
         tokenPayload,
         refreshSecret,
-        { expiresIn: refreshExpiry }
+        { expiresIn: refreshExpiry } as jwt.SignOptions
     );
 
     return { accessToken, refreshToken };
