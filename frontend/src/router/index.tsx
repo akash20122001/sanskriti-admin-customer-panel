@@ -6,6 +6,7 @@ import AdminLayout from '@/layouts/AdminLayout';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import UsersPage from '@/pages/admin/Users';
 import OrdersPage from '@/pages/admin/Orders';
+import BillsPage from '@/pages/admin/Bills';
 
 // Placeholder components for future implementation
 const CustomerDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Customer Dashboard</h1></div>;
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
                     {
                         path: 'orders',
                         element: <OrdersPage />,
+                    },
+                    {
+                        path: 'bills',
+                        element: <BillsPage />,
                     },
                 ],
             },

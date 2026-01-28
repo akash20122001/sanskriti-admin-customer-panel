@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, ShoppingCart, CreditCard, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingCart, FileText, CreditCard, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Button } from './ui/button';
@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Users', path: '/admin/users', icon: Users },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+    { name: 'Bills', path: '/admin/bills', icon: FileText },
     { name: 'Transactions', path: '/admin/transactions', icon: CreditCard },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];

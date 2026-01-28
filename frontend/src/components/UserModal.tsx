@@ -5,14 +5,8 @@ import { z } from 'zod';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
 import type { User } from '@/types';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { CommonModal } from '@/components/ui/commonModal';
+import { DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -127,29 +121,100 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={() => onClose()}>
-            <DialogContent className="sm:max-w-[500px] bg-white dark:bg-dark-bg-elevated">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-display text-primary dark:text-white">
-                        {isEditMode ? 'Edit User' : 'Add New User'}
-                    </DialogTitle>
-                    <DialogDescription className="text-gray-600 dark:text-gray-400">
-                        {isEditMode
-                            ? 'Update user information. Leave password blank to keep current password.'
-                            : 'Create a new user account with their details.'}
-                    </DialogDescription>
-                </DialogHeader>
+        <CommonModal
+            isOpen={isOpen}
+            onClose={() => onClose()}
+            title={isEditMode ? 'Edit User' : 'Add New User'}
+            description={
+                isEditMode
+                    ? 'Update user information. Leave password blank to keep current password.'
+                    : 'Create a new user account with their details.'
+            }
+            maxWidth="sm"
+            footer={
+                <DialogFooter className="gap-2">
+                    <Button type="button" variant="outline" onClick={() => onClose()} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </Button>
+                    <Button type="submit" disabled={form.formState.isSubmitting} form="user-form" className="bg-primary hover:bg-primary-light text-white">
+                        {form.formState.isSubmitting
+                            ? isEditMode
+                                ? 'Updating...'
+                                : 'Creating...'
+                            : isEditMode
+                                ? 'Update User'
+                                : 'Create User'}
+                    </Button>
+                </DialogFooter>
+            }
+        >
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="user-form">
+                    <FormField
+                        control={form.control}
+                        name="userId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-gray-700 dark:text-gray-300">User ID *</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="unique_user_id" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-gray-700 dark:text-gray-300">Full Name *</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="John Doe" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-gray-700 dark:text-gray-300">
+                                    Password {!isEditMode && '*'}
+                                    {isEditMode && ' (leave blank to keep current)'}
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        placeholder={isEditMode ? '••••••' : 'Enter password'}
+                                        {...field}
+                                        className="bg-white dark:bg-dark-bg-tertiary"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
-                            name="userId"
+                            name="role"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-700 dark:text-gray-300">User ID *</FormLabel>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Role *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="unique_user_id" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                        <select
+                                            {...field}
+                                            className="flex h-10 w-full rounded-md border border-gray-300 bg-white dark:bg-dark-bg-tertiary px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                        >
+                                            <option value="CUSTOMER">Customer</option>
+                                            <option value="ADMIN">Admin</option>
+                                        </select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -158,32 +223,17 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
 
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="walletBalance"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-700 dark:text-gray-300">Full Name *</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="John Doe" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-700 dark:text-gray-300">
-                                        Password {!isEditMode && '*'}
-                                        {isEditMode && ' (leave blank to keep current)'}
-                                    </FormLabel>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Wallet Balance *</FormLabel>
                                     <FormControl>
                                         <Input
-                                            type="password"
-                                            placeholder={isEditMode ? '••••••' : 'Enter password'}
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
                                             {...field}
+                                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                             className="bg-white dark:bg-dark-bg-tertiary"
                                         />
                                     </FormControl>
@@ -191,88 +241,30 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                                 </FormItem>
                             )}
                         />
+                    </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="role"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Role *</FormLabel>
-                                        <FormControl>
-                                            <select
-                                                {...field}
-                                                className="flex h-10 w-full rounded-md border border-gray-300 bg-white dark:bg-dark-bg-tertiary px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                                            >
-                                                <option value="CUSTOMER">Customer</option>
-                                                <option value="ADMIN">Admin</option>
-                                            </select>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="walletBalance"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Wallet Balance *</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                {...field}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="active"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex items-center gap-2">
-                                        <FormControl>
-                                            <input
-                                                type="checkbox"
-                                                checked={field.value}
-                                                onChange={field.onChange}
-                                                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                                            />
-                                        </FormControl>
-                                        <FormLabel className="!mt-0 cursor-pointer text-gray-700 dark:text-gray-300">Active Account</FormLabel>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <DialogFooter className="gap-2">
-                            <Button type="button" variant="outline" onClick={() => onClose()} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={form.formState.isSubmitting} className="bg-primary hover:bg-primary-light text-white">
-                                {form.formState.isSubmitting
-                                    ? isEditMode
-                                        ? 'Updating...'
-                                        : 'Creating...'
-                                    : isEditMode
-                                        ? 'Update User'
-                                        : 'Create User'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                    <FormField
+                        control={form.control}
+                        name="active"
+                        render={({ field }) => (
+                            <FormItem>
+                                <div className="flex items-center gap-2">
+                                    <FormControl>
+                                        <input
+                                            type="checkbox"
+                                            checked={field.value}
+                                            onChange={field.onChange}
+                                            className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                        />
+                                    </FormControl>
+                                    <FormLabel className="!mt-0 cursor-pointer text-gray-700 dark:text-gray-300">Active Account</FormLabel>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </form>
+            </Form>
+        </CommonModal>
     );
 }

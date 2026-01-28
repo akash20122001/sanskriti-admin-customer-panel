@@ -56,19 +56,42 @@ export interface Transaction {
     createdAt: string;
 }
 
-// Bill Types
-export type BillStatus = 'PENDING' | 'PAID' | 'OVERDUE';
-
+// Bill/Invoice Types
 export interface Bill {
     id: string;
-    billNumber: string;
-    userId: string;
-    userName?: string;
-    orderId: string;
-    amount: number;
-    status: BillStatus;
-    dueDate: string;
+    transactionId: string;
+    transactionDate: string;
+
+    // Company Details
+    company: string;
+    email: string;
+    phone: string;
+    companyAddress: string;
+    state: string;
+    pin: string;
+    gst: string;
+
+    // Payment (Fixed to Razorpay Wallet)
+    paymentMode: string; // Always "Razorpay Wallet"
+
+    // Product Details
+    productName: string;
+    skuId: string;
+    quantity: number;
+    price: number;
+    currency: Currency;
+    shippingCharge: number;
+    taxPercent: number;
+
+    // Calculated
+    payableAmount: number;
+
+    // Invoice
+    invoiceUrl: string | null;
+
+    // Timestamps
     createdAt: string;
+    updatedAt: string;
 }
 
 // API Response Types

@@ -55,3 +55,43 @@ enum Platform {
   Meesho
   Etsy
 }
+
+model Bill {
+  id              String   @id @default(uuid())
+  transactionId   String   @unique
+  transactionDate DateTime @default(now())
+  
+  // Company Details
+  company         String
+  email           String
+  phone           String
+  companyAddress  String
+  state           String
+  pin             String
+  gst             String
+  
+  // Payment (Fixed: Razorpay Wallet)
+  paymentMode     String   @default("Razorpay Wallet")
+  
+  // Product Details
+  productName     String
+  skuId           String
+  quantity        Int
+  price           Float
+  currency        Currency
+  shippingCharge  Float
+  taxPercent      Float
+  
+  // Calculated
+  payableAmount   Float
+  
+  // Invoice
+  invoiceUrl      String?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([transactionId])
+  @@index([company])
+}
