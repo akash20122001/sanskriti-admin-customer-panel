@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { orderService } from '@/services/order.service';
 import { toast } from 'sonner';
-import type { Order, Currency, Platform } from '@/types';
+import type { Order } from '@/types';
 import {
     Dialog,
     DialogContent,
