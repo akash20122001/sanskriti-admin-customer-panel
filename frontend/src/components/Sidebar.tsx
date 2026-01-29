@@ -66,10 +66,7 @@ export default function Sidebar() {
             >
                 {/* Logo Section */}
                 <div className="p-6 border-b border-primary-light/30 flex flex-col items-center">
-                    <img src="/logo.png" alt="Sanskriti Logo" className="h-16 w-auto mb-2" />
-                    <h1 className="text-xl font-display font-bold text-white">
-                        SANSKRITI
-                    </h1>
+                    <img src="/logo.png" alt="Sanskriti Logo" className="h-24 w-auto mb-2" />
                     <p className="text-xs text-gray-300 mt-1 font-medium bg-white/10 px-2 py-0.5 rounded-full">Admin Panel</p>
                 </div>
 

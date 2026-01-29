@@ -55,7 +55,7 @@ export default function CustomerSidebar() {
             >
                 {/* Logo/Brand */}
                 <div className="p-6 border-b border-white/10 flex flex-col items-center">
-                    <img src="/logo.png" alt="Sanskriti Logo" className="h-14 w-auto mb-2" />
+                    <img src="/logo.png" alt="Sanskriti Logo" className="h-24 w-auto mb-2" />
                     <h1 className="text-xl font-bold">Customer Portal</h1>
                     <p className="text-sm text-white/70 mt-1">{user?.name || 'Welcome'}</p>
                 </div>
@@ -72,8 +72,8 @@ export default function CustomerSidebar() {
                                 to={item.path}
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${active
-                                        ? 'bg-white text-primary shadow-lg'
-                                        : 'text-white/90 hover:bg-white/10'
+                                    ? 'bg-white text-primary shadow-lg'
+                                    : 'text-white/90 hover:bg-white/10'
                                     }`}
                             >
                                 <Icon
