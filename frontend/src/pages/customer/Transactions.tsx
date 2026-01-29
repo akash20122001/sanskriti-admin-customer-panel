@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Receipt, Search, Filter } from 'lucide-react';
+import { Receipt, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { transactionService } from '@/services/transaction.service';
 
@@ -154,8 +154,8 @@ export default function Transactions() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 className={`px-2 py-1 rounded-full text-xs font-semibold ${txn.type === 'CREDIT'
-                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                                        : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                                                     }`}
                                             >
                                                 {txn.type}

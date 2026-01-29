@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Save, Loader2 } from 'lucide-react';
 
 export default function AdminSettings() {
-    const [settings, setSettings] = useState<Settings | null>(null);
+    const [_, setSettings] = useState<Settings | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({

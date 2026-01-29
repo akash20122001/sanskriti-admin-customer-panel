@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Wallet, TrendingUp, ShoppingBag, FileText, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/store/authStore';
+
 import { transactionService } from '@/services/transaction.service';
 import { orderService } from '@/services/order.service';
 import { authService } from '@/services/auth.service';
@@ -18,7 +18,7 @@ interface DashboardStats {
 
 export default function CustomerDashboard() {
     const navigate = useNavigate();
-    const { user } = useAuthStore();
+    // const { user } = useAuthStore();
     const [stats, setStats] = useState<DashboardStats>({
         walletBalance: 0,
         totalTransactions: 0,

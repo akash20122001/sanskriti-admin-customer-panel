@@ -105,8 +105,8 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
 
         setValidatingUserId(true);
         try {
-            const response = await userService.getUsers();
-            const exists = response.users.some((u: User) => u.userId.toLowerCase() === userId.toLowerCase());
+            const response = await userService.getAllUsers();
+            const exists = response.some((u: User) => u.userId.toLowerCase() === userId.toLowerCase());
 
             if (exists) {
                 createForm.setError('userId', {
@@ -200,10 +200,10 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                 </DialogFooter>
             }
         >
-            <Form {...form}>
+            <Form {...(form as any)}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="user-form">
                     <FormField
-                        control={form.control}
+                        control={form.control as any}
                         name="userId"
                         render={({ field }) => (
                             <FormItem>
@@ -231,7 +231,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     />
 
                     <FormField
-                        control={form.control}
+                        control={form.control as any}
                         name="name"
                         render={({ field }) => (
                             <FormItem>
@@ -245,7 +245,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     />
 
                     <FormField
-                        control={form.control}
+                        control={form.control as any}
                         name="password"
                         render={({ field }) => (
                             <FormItem>
@@ -270,7 +270,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     {isEditMode && (
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
-                                control={form.control}
+                                control={form.control as any}
                                 name="role"
                                 render={({ field }) => (
                                     <FormItem>
@@ -290,7 +290,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                             />
 
                             <FormField
-                                control={form.control}
+                                control={form.control as any}
                                 name="walletBalance"
                                 render={({ field }) => (
                                     <FormItem>
@@ -317,7 +317,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     )}
 
                     <FormField
-                        control={form.control}
+                        control={form.control as any}
                         name="active"
                         render={({ field }) => (
                             <FormItem>
