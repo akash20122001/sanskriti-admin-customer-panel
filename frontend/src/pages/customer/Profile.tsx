@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { userService } from '@/services/user.service';
+import { authService } from '@/services/auth.service';
 
 export default function Profile() {
     const [loading, setLoading] = useState(true);
@@ -28,16 +29,15 @@ export default function Profile() {
     const fetchUserProfile = async () => {
         try {
             setLoading(true);
-            const userId = localStorage.getItem('userId') || '';
-            const response = await userService.getUserById(userId);
+            const user = await authService.getCurrentUser();
 
-            if (response.user) {
+            if (user) {
                 setUserData({
-                    userId: response.user.userId,
-                    name: response.user.name,
-                    walletBalance: response.user.walletBalance,
-                    role: response.user.role,
-                    isActive: response.user.isActive,
+                    userId: user.userId,
+                    name: user.name,
+                    walletBalance: user.walletBalance,
+                    role: user.role,
+                    isActive: user.isActive,
                 });
             }
         } catch (error) {
@@ -150,7 +150,7 @@ export default function Profile() {
                                 onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                                 className="bg-white dark:bg-dark-bg-tertiary"
                             />
-                            <Button onClick={handleUpdateName} disabled={saving}>
+                            <Button onClick={handleUpdateName} disabled={saving} className="text-white">
                                 <Save className="w-4 h-4" />
                             </Button>
                         </div>
@@ -221,7 +221,7 @@ export default function Profile() {
                         />
                     </div>
 
-                    <Button onClick={handleChangePassword} disabled={saving} className="w-full">
+                    <Button onClick={handleChangePassword} disabled={saving} className="w-full text-white">
                         Change Password
                     </Button>
                 </div>

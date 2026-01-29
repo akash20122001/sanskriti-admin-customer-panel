@@ -156,7 +156,7 @@ export default function AddBalance() {
                         <Button
                             onClick={handleCreateOrder}
                             disabled={loading || !amount}
-                            className="w-full"
+                            className="w-full text-white"
                         >
                             {loading ? 'Processing...' : 'Proceed to Payment'}
                         </Button>
@@ -193,7 +193,7 @@ export default function AddBalance() {
                                     onClick={() => handleTestPayment(false)}
                                     disabled={loading}
                                     variant="destructive"
-                                    className="flex items-center justify-center gap-2"
+                                    className="flex items-center justify-center gap-2 text-white"
                                 >
                                     <XCircle className="w-5 h-5" />
                                     Failure

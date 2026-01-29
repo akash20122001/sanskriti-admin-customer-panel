@@ -61,6 +61,9 @@ model Bill {
   transactionId   String   @unique
   transactionDate DateTime @default(now())
   
+  // Link to User
+  userId          String?
+  
   // Company Details
   company         String
   email           String

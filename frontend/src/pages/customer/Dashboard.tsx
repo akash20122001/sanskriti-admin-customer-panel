@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/authStore';
 import { transactionService } from '@/services/transaction.service';
 import { orderService } from '@/services/order.service';
+import { authService } from '@/services/auth.service';
 
 interface DashboardStats {
     walletBalance: number;
@@ -35,6 +36,9 @@ export default function CustomerDashboard() {
         try {
             setLoading(true);
 
+            // Fetch fresh user data (for wallet balance)
+            const currentUser = await authService.getCurrentUser();
+
             // Fetch transactions
             const transactionsResponse = await transactionService.getTransactions();
 
@@ -42,7 +46,7 @@ export default function CustomerDashboard() {
             const ordersResponse = await orderService.getCustomerOrders();
 
             setStats({
-                walletBalance: user?.walletBalance || 0,
+                walletBalance: currentUser?.walletBalance || 0,
                 totalTransactions: transactionsResponse.transactions?.length || 0,
                 totalOrders: ordersResponse.orders?.length || 0,
                 totalBills: 0,
@@ -103,7 +107,7 @@ export default function CustomerDashboard() {
                     <h1 className="text-3xl font-bold font-display text-primary">Dashboard</h1>
                     <p className="text-gray-600 mt-1">Welcome back! Here's your overview.</p>
                 </div>
-                <Button onClick={() => navigate('/customer/add-balance')} className="flex items-center gap-2">
+                <Button onClick={() => navigate('/customer/add-balance')} className="flex items-center gap-2 text-white">
                     <Plus className="w-5 h-5" />
                     Add Balance
                 </Button>

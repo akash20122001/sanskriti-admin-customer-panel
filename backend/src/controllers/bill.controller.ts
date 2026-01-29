@@ -153,6 +153,7 @@ export const billController = {
             // Create bill in database
             const bill = await prisma.bill.create({
                 data: {
+                    userId, // Save the userId
                     transactionId,
                     company,
                     email,
@@ -204,7 +205,6 @@ export const billController = {
                 },
             });
 
-
             // Generate PDF invoice asynchronously
             try {
                 const invoiceUrl = await generateInvoicePDF(bill);
@@ -239,22 +239,11 @@ export const billController = {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
-            // Get user's email from database
-            const userData = await prisma.user.findUnique({
-                where: { userId: userId }
-            });
-
-            if (!userData) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-
-            // Note: Bills are matched by email since bills don't have a direct userId field
-            // This assumes the bill's email matches the user's userId/identifier
-            // You may need to adjust this logic based on your actual user-bill relationship
+            // Find bills linked by userId OR email matches (for backward compatibility)
             const bills = await prisma.bill.findMany({
                 where: {
-                    // Match bills where the email contains the user's userId or matches their email
                     OR: [
+                        { userId: userId },
                         { email: { contains: userId } },
                         { company: { contains: userId } },
                     ]

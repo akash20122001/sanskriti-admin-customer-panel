@@ -78,18 +78,6 @@ export default function AdminTransactions() {
         setFilteredTransactions(filtered);
     };
 
-    const getStatusBadgeVariant = (status: string) => {
-        switch (status) {
-            case 'SUCCESS':
-                return 'default';
-            case 'PENDING':
-                return 'secondary';
-            case 'FAILED':
-                return 'destructive';
-            default:
-                return 'outline';
-        }
-    };
 
     const getTypeBadgeColor = (type: string) => {
         return type === 'CREDIT'
@@ -205,9 +193,14 @@ export default function AdminTransactions() {
                                                 </span>
                                             </td>
                                             <td className="py-4">
-                                                <Badge variant={getStatusBadgeVariant(transaction.status)}>
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${transaction.status === 'SUCCESS'
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                    : transaction.status === 'FAILED'
+                                                        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                    }`}>
                                                     {transaction.status}
-                                                </Badge>
+                                                </span>
                                             </td>
                                             <td className="py-4 text-gray-600">
                                                 {transaction.paymentMethod.replace('_', ' ')}
