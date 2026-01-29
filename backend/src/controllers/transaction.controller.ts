@@ -15,26 +15,18 @@ export const transactionController = {
     // Get user's transactions (customer)
     async getTransactions(req: Request, res: Response): Promise<any> {
         try {
-            const user = (req as any).user;
+            const userId = (req as any).userIdString;
+            const userRole = (req as any).userRole;
 
-            if (!user) {
+            if (!userId) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
             // Customer can only see their own transactions
             let whereClause: any = {};
 
-            if (user.role === 'CUSTOMER') {
-                // Find user by userId field
-                const userData = await prisma.user.findUnique({
-                    where: { userId: user.userId }
-                });
-
-                if (!userData) {
-                    return res.status(404).json({ error: 'User not found' });
-                }
-
-                whereClause = { userId: userData.userId };
+            if (userRole === 'CUSTOMER') {
+                whereClause = { userId: userId };
             }
             // Admin can see all transactions (no filter)
 
@@ -55,10 +47,10 @@ export const transactionController = {
     // Create test payment order (simulates payment gateway)
     async createTestOrder(req: Request, res: Response): Promise<any> {
         try {
-            const user = (req as any).user;
+            const userId = (req as any).userIdString;
             const { amount } = req.body;
 
-            if (!user) {
+            if (!userId) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
@@ -77,7 +69,7 @@ export const transactionController = {
 
             // Find user by userId
             const userData = await prisma.user.findUnique({
-                where: { userId: user.userId }
+                where: { userId: userId }
             });
 
             if (!userData) {
@@ -115,10 +107,10 @@ export const transactionController = {
     // Verify test payment (simulates payment verification)
     async verifyTestPayment(req: Request, res: Response): Promise<any> {
         try {
-            const user = (req as any).user;
+            const userId = (req as any).userIdString;
             const { transactionId, success } = req.body;
 
-            if (!user) {
+            if (!userId) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
@@ -136,7 +128,7 @@ export const transactionController = {
             }
 
             // Verify user owns this transaction
-            if (transaction.userId !== user.userId) {
+            if (transaction.userId !== userId) {
                 return res.status(403).json({ error: 'Unauthorized access to transaction' });
             }
 

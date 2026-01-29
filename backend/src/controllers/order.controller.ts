@@ -141,16 +141,16 @@ export const orderController = {
     // Get customer's orders (customer only - returns their own orders)
     async getCustomerOrders(req: Request, res: Response): Promise<any> {
         try {
-            const user = (req as any).user;
+            const userId = (req as any).userIdString;
 
-            if (!user) {
+            if (!userId) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
             // Get orders filtered by customer's userId
             const orders = await prisma.order.findMany({
                 where: {
-                    userId: user.userId,
+                    userId: userId,
                 },
                 orderBy: {
                     createdAt: 'desc',

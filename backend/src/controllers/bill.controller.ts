@@ -196,15 +196,15 @@ export const billController = {
     // Get customer's bills (customer only - returns their own bills)
     async getCustomerBills(req: Request, res: Response): Promise<any> {
         try {
-            const user = (req as any).user;
+            const userId = (req as any).userIdString;
 
-            if (!user) {
+            if (!userId) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
             // Get user's email from database
             const userData = await prisma.user.findUnique({
-                where: { userId: user.userId }
+                where: { userId: userId }
             });
 
             if (!userData) {
@@ -218,8 +218,8 @@ export const billController = {
                 where: {
                     // Match bills where the email contains the user's userId or matches their email
                     OR: [
-                        { email: { contains: user.userId } },
-                        { company: { contains: user.userId } },
+                        { email: { contains: userId } },
+                        { company: { contains: userId } },
                     ]
                 },
                 orderBy: {
