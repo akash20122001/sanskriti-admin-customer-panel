@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,8 +18,18 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 
-// Validation schema
-const userSchema = z.object({
+// Validation schema for create
+const createUserSchema = z.object({
+    userId: z.string()
+        .min(3, 'User ID must be at least 3 characters')
+        .regex(/^[a-zA-Z0-9_-]+$/, 'User ID can only contain letters, numbers, underscores, and hyphens'),
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    active: z.boolean(),
+});
+
+// Validation schema for edit
+const editUserSchema = z.object({
     userId: z.string().min(3, 'User ID must be at least 3 characters'),
     name: z.string().min(2, 'Name must be at least 2 characters'),
     password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
@@ -28,7 +38,8 @@ const userSchema = z.object({
     active: z.boolean(),
 });
 
-type UserFormValues = z.infer<typeof userSchema>;
+type CreateUserFormValues = z.infer<typeof createUserSchema>;
+type EditUserFormValues = z.infer<typeof editUserSchema>;
 
 interface UserModalProps {
     isOpen: boolean;
@@ -38,24 +49,37 @@ interface UserModalProps {
 
 export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
     const isEditMode = !!user;
+    const [validatingUserId, setValidatingUserId] = useState(false);
 
-    const form = useForm<UserFormValues>({
-        resolver: zodResolver(userSchema),
+    const createForm = useForm<CreateUserFormValues>({
+        resolver: zodResolver(createUserSchema),
+        defaultValues: {
+            userId: '',
+            name: '',
+            password: '',
+            active: true,
+        },
+    });
+
+    const editForm = useForm<EditUserFormValues>({
+        resolver: zodResolver(editUserSchema),
         defaultValues: {
             userId: '',
             name: '',
             password: '',
             role: 'CUSTOMER',
-            walletBalance: undefined as any,
+            walletBalance: 0,
             active: true,
         },
     });
+
+    const form = isEditMode ? editForm : createForm;
 
     // Reset form when user changes or modal opens/closes
     useEffect(() => {
         if (isOpen) {
             if (user) {
-                form.reset({
+                editForm.reset({
                     userId: user.userId,
                     name: user.name,
                     password: '', // Don't populate password for security
@@ -64,50 +88,69 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     active: user.isActive,
                 });
             } else {
-                form.reset({
+                createForm.reset({
                     userId: '',
                     name: '',
                     password: '',
-                    role: 'CUSTOMER',
-                    walletBalance: undefined as any,
                     active: true,
                 });
             }
         }
-    }, [isOpen, user, form]);
+    }, [isOpen, user, createForm, editForm]);
 
-    const onSubmit = async (data: UserFormValues) => {
+    // Validate userId availability for create mode
+    const validateUserIdAvailability = async (userId: string) => {
+        if (!userId || userId.length < 3) return;
+
+        setValidatingUserId(true);
+        try {
+            const response = await userService.getUsers();
+            const exists = response.users.some((u: User) => u.userId.toLowerCase() === userId.toLowerCase());
+
+            if (exists) {
+                createForm.setError('userId', {
+                    type: 'manual',
+                    message: 'This User ID is already taken',
+                });
+            } else {
+                createForm.clearErrors('userId');
+            }
+        } catch (error) {
+            console.error('Failed to validate userId:', error);
+        } finally {
+            setValidatingUserId(false);
+        }
+    };
+
+    const onSubmit = async (data: CreateUserFormValues | EditUserFormValues) => {
         try {
             if (isEditMode) {
+                const editData = data as EditUserFormValues;
                 // Filter out empty password
                 const updateData: any = {
-                    userId: data.userId,
-                    name: data.name,
-                    role: data.role,
-                    walletBalance: data.walletBalance,
-                    isActive: data.active,
+                    userId: editData.userId,
+                    name: editData.name,
+                    role: editData.role,
+                    walletBalance: editData.walletBalance,
+                    isActive: editData.active,
                 };
 
-                if (data.password && data.password.trim() !== '') {
-                    updateData.password = data.password;
+                if (editData.password && editData.password.trim() !== '') {
+                    updateData.password = editData.password;
                 }
 
-                await userService.updateUser(user.id, updateData);
+                await userService.updateUser(user!.id, updateData);
                 toast.success('User updated successfully');
             } else {
-                // Create requires password
-                if (!data.password || data.password.trim() === '') {
-                    form.setError('password', { message: 'Password is required' });
-                    return;
-                }
-
+                const createData = data as CreateUserFormValues;
+                // Create new user with defaults
                 await userService.createUser({
-                    userId: data.userId,
-                    name: data.name,
-                    password: data.password,
-                    role: data.role,
-                    walletBalance: data.walletBalance,
-                    isActive: data.active,
+                    userId: createData.userId,
+                    name: createData.name,
+                    password: createData.password,
+                    role: 'CUSTOMER', // Default to CUSTOMER
+                    walletBalance: 0, // Default to 0
+                    isActive: createData.active,
                 });
                 toast.success('User created successfully');
             }
@@ -128,7 +171,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
             description={
                 isEditMode
                     ? 'Update user information. Leave password blank to keep current password.'
-                    : 'Create a new user account with their details.'
+                    : 'Create a new customer account with their details.'
             }
             maxWidth="sm"
             footer={
@@ -136,7 +179,12 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     <Button type="button" variant="outline" onClick={() => onClose()} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={form.formState.isSubmitting} form="user-form" className="bg-primary hover:bg-primary-light text-white">
+                    <Button
+                        type="submit"
+                        disabled={form.formState.isSubmitting || validatingUserId}
+                        form="user-form"
+                        className="bg-primary hover:bg-primary-light text-white"
+                    >
                         {form.formState.isSubmitting
                             ? isEditMode
                                 ? 'Updating...'
@@ -157,8 +205,22 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                             <FormItem>
                                 <FormLabel className="text-gray-700 dark:text-gray-300">User ID *</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="unique_user_id" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                    <Input
+                                        placeholder="unique_user_id"
+                                        {...field}
+                                        disabled={isEditMode}
+                                        onBlur={(e) => {
+                                            field.onBlur();
+                                            if (!isEditMode) {
+                                                validateUserIdAvailability(e.target.value);
+                                            }
+                                        }}
+                                        className="bg-white dark:bg-dark-bg-tertiary"
+                                    />
                                 </FormControl>
+                                {validatingUserId && (
+                                    <p className="text-sm text-gray-500">Checking availability...</p>
+                                )}
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -200,51 +262,55 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                         )}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-700 dark:text-gray-300">Role *</FormLabel>
-                                    <FormControl>
-                                        <select
-                                            {...field}
-                                            className="flex h-10 w-full rounded-md border border-gray-300 bg-white dark:bg-dark-bg-tertiary px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                                        >
-                                            <option value="CUSTOMER">Customer</option>
-                                            <option value="ADMIN">Admin</option>
-                                        </select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    {/* Only show Role and Wallet fields in edit mode */}
+                    {isEditMode && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="role"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Role *</FormLabel>
+                                        <FormControl>
+                                            <select
+                                                {...field}
+                                                className="flex h-10 w-full rounded-md border border-gray-300 bg-white dark:bg-dark-bg-tertiary px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                            >
+                                                <option value="CUSTOMER">Customer</option>
+                                                <option value="ADMIN">Admin</option>
+                                            </select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                        <FormField
-                            control={form.control}
-                            name="walletBalance"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-700 dark:text-gray-300">Wallet Balance *</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="0.00"
-                                            value={field.value ?? ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                field.onChange(val === '' ? undefined : parseFloat(val));
-                                            }}
-                                            className="bg-white dark:bg-dark-bg-tertiary"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                            <FormField
+                                control={form.control}
+                                name="walletBalance"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Wallet Balance *</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={field.value ?? ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    field.onChange(val === '' ? 0 : parseFloat(val));
+                                                }}
+                                                onWheel={(e) => e.currentTarget.blur()} // Prevent scroll wheel change
+                                                className="bg-white dark:bg-dark-bg-tertiary"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
 
                     <FormField
                         control={form.control}

@@ -78,7 +78,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                 form.reset({
                     userId: '',
                     skuId: '',
-                    price: 0,
+                    price: undefined as any,
                     currency: 'USD',
                     platform: undefined,
                 });
