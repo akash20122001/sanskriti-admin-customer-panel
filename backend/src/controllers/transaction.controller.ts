@@ -44,6 +44,41 @@ export const transactionController = {
         }
     },
 
+    // Get all transactions (admin only - includes user details)
+    async getAllTransactions(req: Request, res: Response): Promise<any> {
+        try {
+            const transactions = await prisma.transaction.findMany({
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            });
+
+            // Get user details for each transaction
+            const transactionsWithUserDetails = await Promise.all(
+                transactions.map(async (transaction) => {
+                    const user = await prisma.user.findUnique({
+                        where: { userId: transaction.userId },
+                        select: {
+                            userId: true,
+                            name: true,
+                            role: true,
+                        },
+                    });
+
+                    return {
+                        ...transaction,
+                        user: user || { userId: transaction.userId, name: 'Unknown User', role: 'CUSTOMER' },
+                    };
+                })
+            );
+
+            res.json({ transactions: transactionsWithUserDetails });
+        } catch (error) {
+            console.error('Get all transactions error:', error);
+            res.status(500).json({ error: 'Failed to fetch transactions' });
+        }
+    },
+
     // Create test payment order (simulates payment gateway)
     async createTestOrder(req: Request, res: Response): Promise<any> {
         try {

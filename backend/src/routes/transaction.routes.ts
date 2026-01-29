@@ -11,6 +11,7 @@ router.post('/create-test-order', authenticateToken, transactionController.creat
 router.post('/verify-test-payment', authenticateToken, transactionController.verifyTestPayment);
 
 // Admin routes
+router.get('/all', authenticateToken, requireAdmin, transactionController.getAllTransactions);
 router.post('/admin-credit', authenticateToken, requireAdmin, transactionController.adminCredit);
 
 export default router;

@@ -7,6 +7,7 @@ import AdminDashboard from '@/pages/admin/Dashboard';
 import UsersPage from '@/pages/admin/Users';
 import OrdersPage from '@/pages/admin/Orders';
 import BillsPage from '@/pages/admin/Bills';
+import AdminTransactions from '@/pages/admin/Transactions';
 
 // Customer Pages
 import CustomerLayout from '@/layouts/CustomerLayout';
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
                     {
                         path: 'bills',
                         element: <BillsPage />,
+                    },
+                    {
+                        path: 'transactions',
+                        element: <AdminTransactions />,
                     },
                 ],
             },

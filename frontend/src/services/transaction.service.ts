@@ -19,6 +19,14 @@ export const transactionService = {
         return response.data;
     },
 
+    // Get all transactions (admin only)
+    async getAllTransactions() {
+        const response = await axios.get(`${API_URL}/transactions/all`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    },
+
     // Create test payment order
     async createTestOrder(amount: number) {
         const response = await axios.post(

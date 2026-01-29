@@ -168,6 +168,40 @@ export const billController = {
                 },
             });
 
+            // Find user by email to create transaction and update wallet
+            // Try to find user by exact email match first
+            const user = await prisma.user.findFirst({
+                where: {
+                    OR: [
+                        { userId: email }, // If email is used as userId
+                        { userId: company }, // If company name is used as userId
+                    ]
+                }
+            });
+
+            if (user) {
+                // Create DEBIT transaction for the bill
+                await prisma.transaction.create({
+                    data: {
+                        transactionId,
+                        userId: user.userId,
+                        amount: payableAmount,
+                        type: 'DEBIT',
+                        status: 'SUCCESS',
+                        paymentMethod: 'RAZORPAY_WALLET',
+                        description: `Bill payment for ${productName} (${transactionId})`,
+                    },
+                });
+
+                // Deduct amount from user's wallet
+                await prisma.user.update({
+                    where: { userId: user.userId },
+                    data: {
+                        walletBalance: user.walletBalance - payableAmount,
+                    },
+                });
+            }
+
             // Generate PDF invoice asynchronously
             try {
                 const invoiceUrl = await generateInvoicePDF(bill);
