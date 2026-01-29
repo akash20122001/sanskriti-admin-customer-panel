@@ -58,7 +58,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
         defaultValues: {
             userId: '',
             skuId: '',
-            price: 0,
+            price: undefined as any,
             currency: 'USD',
             platform: undefined,
         },
@@ -183,7 +183,11 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                                             step="0.01"
                                             placeholder="99.99"
                                             {...field}
-                                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                            value={field.value ?? ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                field.onChange(val === '' ? undefined : parseFloat(val));
+                                            }}
                                             className="bg-white dark:bg-dark-bg-tertiary"
                                         />
                                     </FormControl>

@@ -68,10 +68,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
             productName: '',
             skuId: '',
             quantity: 1,
-            price: 0,
+            price: undefined as any,
             currency: 'INR',
-            shippingCharge: 0,
-            taxPercent: 0,
+            shippingCharge: undefined as any,
+            taxPercent: undefined as any,
         },
     });
 
@@ -131,10 +131,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                     productName: '',
                     skuId: '',
                     quantity: 1,
-                    price: 0,
+                    price: undefined as any,
                     currency: 'INR',
-                    shippingCharge: 0,
-                    taxPercent: 0,
+                    shippingCharge: undefined as any,
+                    taxPercent: undefined as any,
                 });
                 setPayableAmount(0);
             }
@@ -385,7 +385,11 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                                 min="1"
                                                 placeholder="1"
                                                 {...field}
-                                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    field.onChange(val === '' ? undefined : parseInt(val));
+                                                }}
                                                 className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
@@ -407,7 +411,11 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                                 step="0.01"
                                                 placeholder="99.99"
                                                 {...field}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    field.onChange(val === '' ? undefined : parseFloat(val));
+                                                }}
                                                 className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
@@ -453,7 +461,11 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                                 step="0.01"
                                                 placeholder="0.00"
                                                 {...field}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    field.onChange(val === '' ? undefined : parseFloat(val));
+                                                }}
                                                 className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
@@ -475,7 +487,11 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                                 step="0.01"
                                                 placeholder="18.00"
                                                 {...field}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    field.onChange(val === '' ? undefined : parseFloat(val));
+                                                }}
                                                 className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />

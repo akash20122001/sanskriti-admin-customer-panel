@@ -46,7 +46,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
             name: '',
             password: '',
             role: 'CUSTOMER',
-            walletBalance: 0,
+            walletBalance: undefined as any,
             active: true,
         },
     });
@@ -69,7 +69,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     name: '',
                     password: '',
                     role: 'CUSTOMER',
-                    walletBalance: 0,
+                    walletBalance: undefined as any,
                     active: true,
                 });
             }
@@ -232,8 +232,11 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                                             type="number"
                                             step="0.01"
                                             placeholder="0.00"
-                                            {...field}
-                                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                            value={field.value ?? ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                field.onChange(val === '' ? undefined : parseFloat(val));
+                                            }}
                                             className="bg-white dark:bg-dark-bg-tertiary"
                                         />
                                     </FormControl>
