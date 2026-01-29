@@ -86,11 +86,16 @@ export const authService = {
   logout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
   },
 
   setSession(response: AuthResponse) {
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
+    // Store userId for easy access in customer pages
+    if (response.user?.userId) {
+      localStorage.setItem('userId', response.user.userId);
+    }
   },
 
   getToken() {

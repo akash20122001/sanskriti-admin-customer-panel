@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Info, CheckCircle, XCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -18,7 +19,6 @@ export default function AddBalance() {
     const handleCreateOrder = async () => {
         const amountNum = parseFloat(amount);
 
-        // Validation
         if (!amount || isNaN(amountNum)) {
             toast.error('Please enter a valid amount');
             return;
@@ -59,7 +59,7 @@ export default function AddBalance() {
 
         try {
             setLoading(true);
-            const response = await transactionService.verifyTestPayment(
+            await transactionService.verifyTestPayment(
                 testPaymentData.transactionId,
                 success
             );
@@ -90,130 +90,134 @@ export default function AddBalance() {
         <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Add Balance</h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    Add money to your wallet using test payment
-                </p>
+                <h1 className="text-3xl font-bold font-display text-primary">Add Balance</h1>
+                <p className="text-gray-600 mt-1">Add money to your wallet using test payment</p>
             </div>
 
             {/* Info Alert */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <div className="flex gap-3">
-                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                        <h3 className="font-semibold text-blue-900 dark:text-blue-100">Test Payment Mode</h3>
-                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                            Razorpay integration is coming soon! For now, use test buttons to simulate payments.
-                            Minimum: ₹100 | Maximum: ₹50,000
-                        </p>
+            <Card className="border-blue-200 bg-blue-50">
+                <CardContent className="pt-6">
+                    <div className="flex gap-3">
+                        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                            <h3 className="font-semibold text-blue-900">Test Payment Mode</h3>
+                            <p className="text-sm text-blue-700 mt-1">
+                                Razorpay integration is coming soon! For now, use test buttons to simulate payments.
+                                Minimum: ₹100 | Maximum: ₹50,000
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             {/* Main Card */}
-            <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg p-6 space-y-6">
-                {/* Amount Input */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Enter Amount (₹)
-                    </label>
-                    <div className="relative">
-                        <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <Input
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="Enter amount"
-                            className="pl-10 text-lg bg-white dark:bg-dark-bg-tertiary"
-                            disabled={testPaymentData !== null}
-                        />
-                    </div>
-                </div>
-
-                {/* Quick Amount Buttons */}
-                <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Quick Select:</p>
-                    <div className="grid grid-cols-3 gap-2">
-                        {quickAmounts.map((quickAmount) => (
-                            <Button
-                                key={quickAmount}
-                                variant="outline"
-                                onClick={() => setAmount(quickAmount.toString())}
+            <Card className="border-0 shadow-lg">
+                <CardHeader>
+                    <CardTitle className="font-display">Enter Amount</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {/* Amount Input */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Amount (₹)
+                        </label>
+                        <div className="relative">
+                            <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <Input
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="Enter amount"
+                                className="pl-10 text-lg"
                                 disabled={testPaymentData !== null}
-                                className="bg-white dark:bg-dark-bg-tertiary"
-                            >
-                                ₹{quickAmount}
-                            </Button>
-                        ))}
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {/* Proceed Button */}
-                {!testPaymentData && (
-                    <Button
-                        onClick={handleCreateOrder}
-                        disabled={loading || !amount}
-                        className="w-full bg-primary hover:bg-primary/90 text-white"
-                    >
-                        {loading ? 'Processing...' : 'Proceed to Payment'}
-                    </Button>
-                )}
-
-                {/* Test Payment Buttons */}
-                {testPaymentData && (
-                    <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Transaction ID:</p>
-                            <p className="font-mono text-sm font-semibold text-gray-900 dark:text-white">
-                                {testPaymentData.transactionId}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Amount:</p>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                ₹{testPaymentData.amount.toFixed(2)}
-                            </p>
+                    {/* Quick Amount Buttons */}
+                    <div>
+                        <p className="text-sm text-gray-600 mb-2">Quick Select:</p>
+                        <div className="grid grid-cols-3 gap-2">
+                            {quickAmounts.map((quickAmount) => (
+                                <Button
+                                    key={quickAmount}
+                                    variant="outline"
+                                    onClick={() => setAmount(quickAmount.toString())}
+                                    disabled={testPaymentData !== null}
+                                >
+                                    ₹{quickAmount}
+                                </Button>
+                            ))}
                         </div>
+                    </div>
 
-                        <p className="text-center text-gray-600 dark:text-gray-400 font-medium">
-                            Simulate Payment Outcome:
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <Button
-                                onClick={() => handleTestPayment(true)}
-                                disabled={loading}
-                                className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
-                            >
-                                <CheckCircle className="w-5 h-5" />
-                                Success
-                            </Button>
-                            <Button
-                                onClick={() => handleTestPayment(false)}
-                                disabled={loading}
-                                variant="destructive"
-                                className="flex items-center justify-center gap-2"
-                            >
-                                <XCircle className="w-5 h-5" />
-                                Failure
-                            </Button>
-                        </div>
-
+                    {/* Proceed Button */}
+                    {!testPaymentData && (
                         <Button
-                            variant="outline"
-                            onClick={() => {
-                                setTestPaymentData(null);
-                                setAmount('');
-                            }}
-                            disabled={loading}
+                            onClick={handleCreateOrder}
+                            disabled={loading || !amount}
                             className="w-full"
                         >
-                            Cancel
+                            {loading ? 'Processing...' : 'Proceed to Payment'}
                         </Button>
-                    </div>
-                )}
-            </div>
+                    )}
+
+                    {/* Test Payment Buttons */}
+                    {testPaymentData && (
+                        <div className="space-y-4 pt-4 border-t">
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <p className="text-sm text-gray-600">Transaction ID:</p>
+                                <p className="font-mono text-sm font-semibold text-primary">
+                                    {testPaymentData.transactionId}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-2">Amount:</p>
+                                <p className="text-2xl font-bold font-display text-primary">
+                                    ₹{testPaymentData.amount.toFixed(2)}
+                                </p>
+                            </div>
+
+                            <p className="text-center text-gray-600 font-medium">
+                                Simulate Payment Outcome:
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <Button
+                                    onClick={() => handleTestPayment(true)}
+                                    disabled={loading}
+                                    className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
+                                >
+                                    <CheckCircle className="w-5 h-5" />
+                                    Success
+                                </Button>
+                                <Button
+                                    onClick={() => handleTestPayment(false)}
+                                    disabled={loading}
+                                    variant="destructive"
+                                    className="flex items-center justify-center gap-2"
+                                >
+                                    <XCircle className="w-5 h-5" />
+                                    Failure
+                                </Button>
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setTestPaymentData(null);
+                                    setAmount('');
+                                }}
+                                disabled={loading}
+                                className="w-full"
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Help Text */}
-            <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-center text-sm text-gray-500">
                 <p>Your wallet balance will be updated immediately after successful payment</p>
             </div>
         </div>
