@@ -68,35 +68,35 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber?: string): string {
         <title>Invoice ${invoiceNumber || bill.transactionId}</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: white; color: #333; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: white; color: #333; }
             .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
-            .invoice-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 40px; }
-            .invoice-title { font-size: 32px; font-weight: bold; margin-bottom: 5px; margin-top: 10px; }
-            .transaction-info { background: #f8f9fa; padding: 20px 40px; border-bottom: 2px solid #e0e0e0; display: flex; justify-content: space-between; }
-            .info-group { display: flex; flex-direction: column; gap: 5px; }
-            .info-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-            .info-value { font-size: 16px; font-weight: 600; color: #333; }
-            .invoice-body { padding: 30px 40px; }
-            .section { margin-bottom: 30px; }
-            .section-title { font-size: 14px; font-weight: 600; color: #667eea; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; border-bottom: 2px solid #667eea; padding-bottom: 5px; }
-            .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; }
-            .detail-item { display: flex; flex-direction: column; gap: 3px; }
-            .detail-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.3px; }
-            .detail-value { font-size: 14px; color: #333; font-weight: 500; }
-            .product-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            .product-table th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #666; border-bottom: 2px solid #e0e0e0; }
-            .product-table td { padding: 15px 12px; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
-            .amount-breakdown { margin-top: 20px; background: #f8f9fa; border-radius: 6px; padding: 20px; }
-            .breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
-            .breakdown-row.total { border-top: 2px solid #667eea; margin-top: 10px; padding-top: 15px; font-size: 18px; font-weight: bold; color: #667eea; }
-            .payment-mode-box { background: #667eea; color: white; padding: 15px; border-radius: 6px; text-align: center; margin-top: 20px; }
-            .payment-mode-label { font-size: 11px; text-transform: uppercase; opacity: 0.9; margin-bottom: 5px; letter-spacing: 0.5px; }
-            .payment-mode-value { font-size: 16px; font-weight: 600; }
-            .invoice-footer { background: #f8f9fa; padding: 20px 40px; border-top: 2px solid #e0e0e0; font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 20px; }
+            .invoice-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; }
+            .invoice-title { font-size: 28px; font-weight: bold; margin-bottom: 5px; margin-top: 5px; }
+            .transaction-info { background: #f8f9fa; padding: 15px 30px; border-bottom: 2px solid #e0e0e0; display: flex; justify-content: space-between; }
+            .info-group { display: flex; flex-direction: column; gap: 3px; }
+            .info-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+            .info-value { font-size: 14px; font-weight: 600; color: #333; }
+            .invoice-body { padding: 20px 30px; }
+            .section { margin-bottom: 20px; }
+            .section-title { font-size: 13px; font-weight: 600; color: #667eea; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; border-bottom: 2px solid #667eea; padding-bottom: 3px; }
+            .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px; }
+            .detail-item { display: flex; flex-direction: column; gap: 2px; }
+            .detail-label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.3px; }
+            .detail-value { font-size: 13px; color: #333; font-weight: 500; }
+            .product-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+            .product-table th { background: #f8f9fa; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666; border-bottom: 2px solid #e0e0e0; }
+            .product-table td { padding: 12px 10px; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
+            .amount-breakdown { margin-top: 15px; background: #f8f9fa; border-radius: 6px; padding: 15px; }
+            .breakdown-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+            .breakdown-row.total { border-top: 2px solid #667eea; margin-top: 8px; padding-top: 10px; font-size: 16px; font-weight: bold; color: #667eea; }
+            .payment-mode-box { background: #667eea; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-top: 15px; }
+            .payment-mode-label { font-size: 10px; text-transform: uppercase; opacity: 0.9; margin-bottom: 3px; letter-spacing: 0.5px; }
+            .payment-mode-value { font-size: 14px; font-weight: 600; }
+            .invoice-footer { background: #f8f9fa; padding: 15px 30px; border-top: 2px solid #e0e0e0; font-size: 11px; color: #666; display: flex; justify-content: space-between; gap: 20px; }
             .footer-section { flex: 1; }
-            .footer-title { font-weight: bold; margin-bottom: 8px; color: #333; }
+            .footer-title { font-weight: bold; margin-bottom: 5px; color: #333; }
             .footer-list { list-style: none; padding: 0; }
-            .footer-list li { margin-bottom: 4px; position: relative; padding-left: 10px; }
+            .footer-list li { margin-bottom: 3px; position: relative; padding-left: 10px; }
             .footer-list li::before { content: "•"; position: absolute; left: 0; }
         </style>
     </head>
@@ -106,7 +106,7 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber?: string): string {
             <div class="invoice-header">
                 ${logoHtml}
                 <div class="invoice-title">INVOICE</div>
-                <div style="font-size: 14px; opacity: 0.9;">${invoiceNumber || ''}</div>
+                <div style="font-size: 14px; opacity: 0.9;">Invoice Number - ${invoiceNumber || ''}</div>
             </div>
             
             <!-- Transaction Info -->
