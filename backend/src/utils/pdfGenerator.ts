@@ -40,9 +40,19 @@ function formatDate(date: Date | string): string {
     });
 }
 
+export interface CompanySettings {
+    companyPan: string;
+    companyGst: string;
+}
+
 // Generate HTML for invoice
-function generateInvoiceHTML(bill: Bill, invoiceNumber?: string): string {
+function generateInvoiceHTML(bill: Bill, invoiceNumber: string | undefined, settings: CompanySettings): string {
     const currencySymbol = getCurrencySymbol(bill.currency);
+    // ... (rest of logic same until footer)
+    // line 225-226:
+    // <div>Company PAN: ${settings.companyPan}</div>
+    // <div>Company GSTIN/UIN: ${settings.companyGst}</div>
+
     const subtotal = bill.quantity * bill.price;
     const taxAmount = subtotal * (bill.taxPercent / 100);
 
@@ -222,8 +232,8 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber?: string): string {
                 </div>
                 <div class="footer-section" style="text-align: right;">
                     <div class="footer-title">Company Details</div>
-                    <div>Company PAN: CANPJ8390R</div>
-                    <div>Company GSTIN/UIN: 08CANPJ3390R1ZT</div>
+                    <div>Company PAN: ${settings.companyPan}</div>
+                    <div>Company GSTIN/UIN: ${settings.companyGst}</div>
                 </div>
             </div>
         </div>
@@ -233,7 +243,7 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber?: string): string {
 }
 
 // Generate PDF invoice
-export async function generateInvoicePDF(bill: Bill): Promise<string> {
+export async function generateInvoicePDF(bill: Bill, settings: CompanySettings): Promise<string> {
     const invoicesDir = path.join(__dirname, '../../invoices');
 
     // Create invoices directory if it doesn't exist
@@ -245,7 +255,7 @@ export async function generateInvoicePDF(bill: Bill): Promise<string> {
     const filepath = path.join(invoicesDir, filename);
 
     // Generate HTML
-    const html = generateInvoiceHTML(bill, bill.invoiceNumber || undefined);
+    const html = generateInvoiceHTML(bill, bill.invoiceNumber || undefined, settings);
 
     // Launch Puppeteer and generate PDF
     const browser = await puppeteer.launch({

@@ -8,6 +8,7 @@ import orderRoutes from './routes/order.routes';
 import billRoutes from './routes/bill.routes';
 import transactionRoutes from './routes/transaction.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import settingsRoutes from './routes/settings.routes';
 import { seedDatabase } from './controllers/seed.controller';
 
 dotenv.config();
@@ -31,7 +32,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/bills', billRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/settings', settingsRoutes);
+
 
 // Serve static invoices
 app.use('/invoices', express.static(path.join(__dirname, '../invoices')));

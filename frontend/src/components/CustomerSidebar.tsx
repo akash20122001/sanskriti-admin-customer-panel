@@ -50,13 +50,13 @@ export default function CustomerSidebar() {
 
             {/* Sidebar */}
             <aside
-                className={`${
-                    isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                } lg:translate-x-0 fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-primary to-primary-dark text-white transition-transform duration-300 ease-in-out flex flex-col`}
+                className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                    } lg:translate-x-0 fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-primary to-primary-dark text-white transition-transform duration-300 ease-in-out flex flex-col`}
             >
                 {/* Logo/Brand */}
-                <div className="p-6 border-b border-white/10">
-                    <h1 className="text-2xl font-bold">Customer Portal</h1>
+                <div className="p-6 border-b border-white/10 flex flex-col items-center">
+                    <img src="/logo.png" alt="Sanskriti Logo" className="h-14 w-auto mb-2" />
+                    <h1 className="text-xl font-bold">Customer Portal</h1>
                     <p className="text-sm text-white/70 mt-1">{user?.name || 'Welcome'}</p>
                 </div>
 
@@ -71,16 +71,14 @@ export default function CustomerSidebar() {
                                 key={item.path}
                                 to={item.path}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
-                                    active
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${active
                                         ? 'bg-white text-primary shadow-lg'
                                         : 'text-white/90 hover:bg-white/10'
-                                }`}
+                                    }`}
                             >
                                 <Icon
-                                    className={`w-5 h-5 ${
-                                        active ? 'text-primary' : 'text-white/70 group-hover:text-white'
-                                    }`}
+                                    className={`w-5 h-5 ${active ? 'text-primary' : 'text-white/70 group-hover:text-white'
+                                        }`}
                                 />
                                 <span className="font-medium">{item.name}</span>
                             </Link>

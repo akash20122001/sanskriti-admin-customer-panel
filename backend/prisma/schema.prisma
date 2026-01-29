@@ -127,3 +127,10 @@ enum TransactionStatus {
   SUCCESS
   FAILED
 }
+
+model Settings {
+  id          String   @id @default(uuid())
+  companyPan  String   @default("CANPJ8390R")
+  companyGst  String   @default("08CANPJ3390R1ZT")
+  updatedAt   DateTime @updatedAt
+}

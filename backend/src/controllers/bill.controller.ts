@@ -176,7 +176,15 @@ export const billController = {
 
             // Generate PDF
             try {
-                const invoiceUrl = await generateInvoicePDF(bill);
+                // Fetch settings
+                let settings = await prisma.settings.findFirst();
+
+                // Pass settings to generator (defaults handled in generator if passed undefined, but we pass concrete object here)
+                const invoiceUrl = await generateInvoicePDF(bill, {
+                    companyPan: settings?.companyPan || 'CANPJ8390R',
+                    companyGst: settings?.companyGst || '08CANPJ3390R1ZT'
+                });
+
                 await prisma.bill.update({ where: { id: bill.id }, data: { invoiceUrl } });
 
                 const finalBill = await prisma.bill.findUnique({ where: { id: bill.id } });
