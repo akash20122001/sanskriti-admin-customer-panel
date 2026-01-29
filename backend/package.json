@@ -11,7 +11,9 @@
     "start:migrate": "prisma migrate deploy && node dist/app.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "fix-migration-applied": "prisma migrate resolve --applied 20260129180605_add_userid_to_bill",
+    "fix-migration-rollback": "prisma migrate resolve --rolled-back 20260129180605_add_userid_to_bill"
   },
   "keywords": [],
   "author": "",
