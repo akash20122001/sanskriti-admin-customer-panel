@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { transactionService } from '@/services/transaction.service';
 import { orderService } from '@/services/order.service';
 import { authService } from '@/services/auth.service';
+import { billService } from '@/services/bill.service';
 
 interface DashboardStats {
     walletBalance: number;
@@ -45,11 +46,14 @@ export default function CustomerDashboard() {
             // Fetch orders
             const ordersResponse = await orderService.getCustomerOrders();
 
+            // Fetch bills
+            const billsResponse = await billService.getCustomerBills();
+
             setStats({
                 walletBalance: currentUser?.walletBalance || 0,
                 totalTransactions: transactionsResponse.transactions?.length || 0,
                 totalOrders: ordersResponse.orders?.length || 0,
-                totalBills: 0,
+                totalBills: billsResponse.bills?.length || 0,
             });
 
             setRecentTransactions(transactionsResponse.transactions?.slice(0, 5) || []);
