@@ -16,8 +16,9 @@ function generateTransactionId(): string {
 // Calculate payable amount
 function calculatePayableAmount(quantity: number, price: number, taxPercent: number, shippingCharge: number): number {
     const subtotal = quantity * price;
-    const taxAmount = subtotal * (taxPercent / 100);
-    const total = subtotal + taxAmount + shippingCharge;
+    const subtotalWithShipping = subtotal + shippingCharge;
+    const taxAmount = subtotalWithShipping * (taxPercent / 100);
+    const total = subtotalWithShipping + taxAmount;
     return parseFloat(total.toFixed(2));
 }
 
@@ -62,6 +63,7 @@ export const billController = {
     async createBill(req: Request, res: Response): Promise<any> {
         try {
             const {
+                userId,
                 company,
                 email,
                 phone,
@@ -79,6 +81,10 @@ export const billController = {
             } = req.body;
 
             // Validation
+            if (!userId) {
+                return res.status(400).json({ error: 'User ID is required' });
+            }
+
             if (!company || !email || !phone || !companyAddress || !state || !pin || !gst) {
                 return res.status(400).json({ error: 'Missing required company details' });
             }
@@ -168,39 +174,36 @@ export const billController = {
                 },
             });
 
-            // Find user by email to create transaction and update wallet
-            // Try to find user by exact email match first
-            const user = await prisma.user.findFirst({
-                where: {
-                    OR: [
-                        { userId: email }, // If email is used as userId
-                        { userId: company }, // If company name is used as userId
-                    ]
-                }
+            // Find user by provided userId to create transaction and update wallet
+            const user = await prisma.user.findUnique({
+                where: { userId: userId }
             });
 
-            if (user) {
-                // Create DEBIT transaction for the bill
-                await prisma.transaction.create({
-                    data: {
-                        transactionId,
-                        userId: user.userId,
-                        amount: payableAmount,
-                        type: 'DEBIT',
-                        status: 'SUCCESS',
-                        paymentMethod: 'RAZORPAY_WALLET',
-                        description: `Bill payment for ${productName} (${transactionId})`,
-                    },
-                });
-
-                // Deduct amount from user's wallet
-                await prisma.user.update({
-                    where: { userId: user.userId },
-                    data: {
-                        walletBalance: user.walletBalance - payableAmount,
-                    },
-                });
+            if (!user) {
+                return res.status(404).json({ error: `User with ID '${userId}' not found` });
             }
+
+            // Create DEBIT transaction for the bill
+            await prisma.transaction.create({
+                data: {
+                    transactionId,
+                    userId: user.userId,
+                    amount: payableAmount,
+                    type: 'DEBIT',
+                    status: 'SUCCESS',
+                    paymentMethod: 'RAZORPAY_WALLET',
+                    description: `Bill payment for ${productName} (${transactionId})`,
+                },
+            });
+
+            // Deduct amount from user's wallet
+            await prisma.user.update({
+                where: { userId: user.userId },
+                data: {
+                    walletBalance: user.walletBalance - payableAmount,
+                },
+            });
+
 
             // Generate PDF invoice asynchronously
             try {

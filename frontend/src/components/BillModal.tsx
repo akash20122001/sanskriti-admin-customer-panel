@@ -27,6 +27,7 @@ import {
 
 // Validation schema
 const billSchema = z.object({
+    userId: z.string().min(1, 'User ID is required'),
     company: z.string().min(1, 'Company name is required'),
     email: z.string().email('Invalid email address'),
     phone: z.string().regex(/^\d{10}$/, 'Phone must be 10 digits'),
@@ -58,6 +59,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
     const form = useForm<BillFormValues>({
         resolver: zodResolver(billSchema),
         defaultValues: {
+            userId: '',
             company: '',
             email: '',
             phone: '',
@@ -78,8 +80,9 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
     // Calculate payable amount
     const calculatePayableAmount = (quantity: number, price: number, taxPercent: number, shippingCharge: number) => {
         const subtotal = quantity * price;
-        const taxAmount = subtotal * (taxPercent / 100);
-        const total = subtotal + taxAmount + shippingCharge;
+        const subtotalWithShipping = subtotal + shippingCharge;
+        const taxAmount = subtotalWithShipping * (taxPercent / 100);
+        const total = subtotalWithShipping + taxAmount;
         return parseFloat(total.toFixed(2));
     };
 
@@ -225,6 +228,26 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                             Company Details
                         </h3>
 
+                        {/* User ID Field */}
+                        <FormField
+                            control={form.control}
+                            name="userId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Customer User ID *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="customer_id"
+                                            {...field}
+                                            className="bg-white dark:bg-dark-bg-tertiary"
+                                            disabled={isEditMode}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -239,6 +262,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     </FormItem>
                                 )}
                             />
+
 
                             <FormField
                                 control={form.control}
@@ -535,6 +559,6 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                     </div>
                 </form>
             </Form>
-        </CommonModal>
+        </CommonModal >
     );
 }
