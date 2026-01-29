@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { billService } from '@/services/bill.service';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react'; // Added import
 import type { Bill } from '@/types';
 import { CommonModal } from '@/components/ui/commonModal';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -55,6 +56,7 @@ interface BillModalProps {
 export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
     const isEditMode = !!bill;
     const [payableAmount, setPayableAmount] = useState(0);
+    const [isDownloading, setIsDownloading] = useState(false); // Added state
 
     const form = useForm<BillFormValues>({
         resolver: zodResolver(billSchema),
@@ -187,9 +189,13 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                         <Button
                             type="submit"
                             form="bill-form"
+                            disabled={form.formState.isSubmitting}
                             className="bg-primary hover:bg-primary/90 text-white"
                         >
-                            Create Bill & Generate Invoice
+                            {form.formState.isSubmitting && (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            )}
+                            {form.formState.isSubmitting ? 'Creating...' : 'Create Bill & Generate Invoice'}
                         </Button>
                     </DialogFooter>
                 ) : bill?.invoiceUrl ? (
@@ -198,15 +204,22 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                             type="button"
                             onClick={async () => {
                                 try {
+                                    setIsDownloading(true);
                                     const url = await billService.downloadInvoice(bill.id);
                                     window.open(url, '_blank');
                                 } catch (error) {
                                     toast.error('Failed to open invoice');
+                                } finally {
+                                    setIsDownloading(false);
                                 }
                             }}
+                            disabled={isDownloading}
                             className="bg-primary hover:bg-primary/90 text-white"
                         >
-                            Download Invoice
+                            {isDownloading && (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            )}
+                            {isDownloading ? 'Opening...' : 'Download Invoice'}
                         </Button>
                         <Button
                             type="button"

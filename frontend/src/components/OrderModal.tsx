@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { orderService } from '@/services/order.service';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import type { Order } from '@/types';
 import { CommonModal } from '@/components/ui/commonModal';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -128,9 +129,16 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     <Button
                         type="submit"
                         form="order-form"
+                        disabled={form.formState.isSubmitting}
                         className="bg-primary hover:bg-primary/90 text-white"
                     >
-                        {isEditMode ? 'Update Order' : 'Create Order'}
+                        {form.formState.isSubmitting && (
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        )}
+                        {form.formState.isSubmitting
+                            ? (isEditMode ? 'Updating...' : 'Creating...')
+                            : (isEditMode ? 'Update Order' : 'Create Order')
+                        }
                     </Button>
                 </DialogFooter>
             }
