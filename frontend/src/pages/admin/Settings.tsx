@@ -95,7 +95,7 @@ export default function AdminSettings() {
                         </div>
 
                         <div className="pt-4">
-                            <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+                            <Button type="submit" disabled={saving} className="w-full sm:w-auto text-white">
                                 {saving ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
