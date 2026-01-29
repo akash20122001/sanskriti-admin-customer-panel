@@ -59,6 +59,7 @@ enum Platform {
 model Bill {
   id              String   @id @default(uuid())
   transactionId   String   @unique
+  invoiceNumber   String?  @unique // Custom Invoice Number (e.g. STA3000)
   transactionDate DateTime @default(now())
   
   // Link to User
@@ -90,6 +91,7 @@ model Bill {
   
   // Invoice
   invoiceUrl      String?
+
   
   // Timestamps
   createdAt       DateTime @default(now())

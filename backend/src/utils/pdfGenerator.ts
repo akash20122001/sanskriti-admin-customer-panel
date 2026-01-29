@@ -22,6 +22,7 @@ interface Bill {
     shippingCharge: number;
     taxPercent: number;
     payableAmount: number;
+    invoiceNumber?: string | null;
 }
 
 // Get currency symbol
@@ -40,10 +41,23 @@ function formatDate(date: Date | string): string {
 }
 
 // Generate HTML for invoice
-function generateInvoiceHTML(bill: Bill): string {
+function generateInvoiceHTML(bill: Bill, invoiceNumber?: string): string {
     const currencySymbol = getCurrencySymbol(bill.currency);
     const subtotal = bill.quantity * bill.price;
     const taxAmount = subtotal * (bill.taxPercent / 100);
+
+    // Process Logo
+    const logoPath = path.join(__dirname, '../assets/logo.png');
+    let logoHtml = '<div class="company-name" style="font-size: 24px; font-weight: bold;">SANSKRITI</div>';
+
+    if (fs.existsSync(logoPath)) {
+        try {
+            const logoData = fs.readFileSync(logoPath).toString('base64');
+            logoHtml = `<img src="data:image/png;base64,${logoData}" alt="Logo" style="height: 60px; margin-bottom: 10px;" />`;
+        } catch (e) {
+            console.error('Error reading logo:', e);
+        }
+    }
 
     return `
     <!DOCTYPE html>
@@ -51,205 +65,48 @@ function generateInvoiceHTML(bill: Bill): string {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Invoice ${bill.transactionId}</title>
+        <title>Invoice ${invoiceNumber || bill.transactionId}</title>
         <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                padding: 40px;
-                background: white;
-                color: #333;
-            }
-            
-            .invoice-container {
-                max-width: 800px;
-                margin: 0 auto;
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            
-            .invoice-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 30px 40px;
-            }
-            
-            .invoice-title {
-                font-size: 32px;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }
-            
-            .company-name {
-                font-size: 18px;
-                opacity: 0.95;
-            }
-            
-            .transaction-info {
-                background: #f8f9fa;
-                padding: 20px 40px;
-                border-bottom: 2px solid #e0e0e0;
-                display: flex;
-                justify-content: space-between;
-            }
-            
-            .info-group {
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .info-label {
-                font-size: 12px;
-                color: #666;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            
-            .info-value {
-                font-size: 16px;
-                font-weight: 600;
-                color: #333;
-            }
-            
-            .invoice-body {
-                padding: 30px 40px;
-            }
-            
-            .section {
-                margin-bottom: 30px;
-            }
-            
-            .section-title {
-                font-size: 14px;
-                font-weight: 600;
-                color: #667eea;
-                text-transform: uppercase;
-                margin-bottom: 15px;
-                letter-spacing: 0.5px;
-                border-bottom: 2px solid #667eea;
-                padding-bottom: 5px;
-            }
-            
-            .details-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 15px 30px;
-            }
-            
-            .detail-item {
-                display: flex;
-                flex-direction: column;
-                gap: 3px;
-            }
-            
-            .detail-label {
-                font-size: 11px;
-                color: #666;
-                text-transform: uppercase;
-                letter-spacing: 0.3px;
-            }
-            
-            .detail-value {
-                font-size: 14px;
-                color: #333;
-                font-weight: 500;
-            }
-            
-            .product-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 10px;
-            }
-            
-            .product-table th {
-                background: #f8f9fa;
-                padding: 12px;
-                text-align: left;
-                font-size: 12px;
-                text-transform: uppercase;
-                color: #666;
-                border-bottom: 2px solid #e0e0e0;
-            }
-            
-            .product-table td {
-                padding: 15px 12px;
-                border-bottom: 1px solid #e0e0e0;
-                font-size: 14px;
-            }
-            
-            .amount-breakdown {
-                margin-top: 20px;
-                background: #f8f9fa;
-                border-radius: 6px;
-                padding: 20px;
-            }
-            
-            .breakdown-row {
-                display: flex;
-                justify-content: space-between;
-                padding: 8px 0;
-                font-size: 14px;
-            }
-            
-            .breakdown-row.total {
-                border-top: 2px solid #667eea;
-                margin-top: 10px;
-                padding-top: 15px;
-                font-size: 18px;
-                font-weight: bold;
-                color: #667eea;
-            }
-            
-            .payment-mode-box {
-                background: #667eea;
-                color: white;
-                padding: 15px;
-                border-radius: 6px;
-                text-align: center;
-                margin-top: 20px;
-            }
-            
-            .payment-mode-label {
-                font-size: 11px;
-                text-transform: uppercase;
-                opacity: 0.9;
-                margin-bottom: 5px;
-                letter-spacing: 0.5px;
-            }
-            
-            .payment-mode-value {
-                font-size: 16px;
-                font-weight: 600;
-            }
-            
-            .invoice-footer {
-                background: #f8f9fa;
-                padding: 20px 40px;
-                text-align: center;
-                border-top: 2px solid #e0e0e0;
-                font-size: 12px;
-                color: #666;
-            }
-            
-            .footer-note {
-                margin-top: 10px;
-                font-style: italic;
-            }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: white; color: #333; }
+            .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+            .invoice-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 40px; }
+            .invoice-title { font-size: 32px; font-weight: bold; margin-bottom: 5px; margin-top: 10px; }
+            .transaction-info { background: #f8f9fa; padding: 20px 40px; border-bottom: 2px solid #e0e0e0; display: flex; justify-content: space-between; }
+            .info-group { display: flex; flex-direction: column; gap: 5px; }
+            .info-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+            .info-value { font-size: 16px; font-weight: 600; color: #333; }
+            .invoice-body { padding: 30px 40px; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 14px; font-weight: 600; color: #667eea; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; border-bottom: 2px solid #667eea; padding-bottom: 5px; }
+            .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; }
+            .detail-item { display: flex; flex-direction: column; gap: 3px; }
+            .detail-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.3px; }
+            .detail-value { font-size: 14px; color: #333; font-weight: 500; }
+            .product-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .product-table th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #666; border-bottom: 2px solid #e0e0e0; }
+            .product-table td { padding: 15px 12px; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
+            .amount-breakdown { margin-top: 20px; background: #f8f9fa; border-radius: 6px; padding: 20px; }
+            .breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+            .breakdown-row.total { border-top: 2px solid #667eea; margin-top: 10px; padding-top: 15px; font-size: 18px; font-weight: bold; color: #667eea; }
+            .payment-mode-box { background: #667eea; color: white; padding: 15px; border-radius: 6px; text-align: center; margin-top: 20px; }
+            .payment-mode-label { font-size: 11px; text-transform: uppercase; opacity: 0.9; margin-bottom: 5px; letter-spacing: 0.5px; }
+            .payment-mode-value { font-size: 16px; font-weight: 600; }
+            .invoice-footer { background: #f8f9fa; padding: 20px 40px; border-top: 2px solid #e0e0e0; font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 20px; }
+            .footer-section { flex: 1; }
+            .footer-title { font-weight: bold; margin-bottom: 8px; color: #333; }
+            .footer-list { list-style: none; padding: 0; }
+            .footer-list li { margin-bottom: 4px; position: relative; padding-left: 10px; }
+            .footer-list li::before { content: "•"; position: absolute; left: 0; }
         </style>
     </head>
     <body>
         <div class="invoice-container">
             <!-- Header -->
             <div class="invoice-header">
+                ${logoHtml}
                 <div class="invoice-title">INVOICE</div>
-                <div class="company-name">SANSKRITI</div>
+                <div style="font-size: 14px; opacity: 0.9;">${invoiceNumber || ''}</div>
             </div>
             
             <!-- Transaction Info -->
@@ -258,7 +115,7 @@ function generateInvoiceHTML(bill: Bill): string {
                     <div class="info-label">Transaction ID</div>
                     <div class="info-value">${bill.transactionId}</div>
                 </div>
-                <div class="info-group">
+                <div class="info-group" style="text-align: right;">
                     <div class="info-label">Transaction Date</div>
                     <div class="info-value">${formatDate(bill.transactionDate)}</div>
                 </div>
@@ -271,7 +128,7 @@ function generateInvoiceHTML(bill: Bill): string {
                     <div class="section-title">Bill To</div>
                     <div class="details-grid">
                         <div class="detail-item">
-                            <div class="detail-label">Company Name</div>
+                            <div class="detail-label">Name</div>
                             <div class="detail-value">${bill.company}</div>
                         </div>
                         <div class="detail-item">
@@ -286,9 +143,17 @@ function generateInvoiceHTML(bill: Bill): string {
                             <div class="detail-label">GST Number</div>
                             <div class="detail-value">${bill.gst}</div>
                         </div>
+                        <div class="detail-item">
+                            <div class="detail-label">State</div>
+                            <div class="detail-value">${bill.state}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">PIN Code</div>
+                            <div class="detail-value">${bill.pin}</div>
+                        </div>
                         <div class="detail-item" style="grid-column: 1 / -1;">
                             <div class="detail-label">Address</div>
-                            <div class="detail-value">${bill.companyAddress}, ${bill.state}, ${bill.pin}</div>
+                            <div class="detail-value">${bill.companyAddress}</div>
                         </div>
                     </div>
                 </div>
@@ -347,9 +212,18 @@ function generateInvoiceHTML(bill: Bill): string {
             
             <!-- Footer -->
             <div class="invoice-footer">
-                <strong>Thank you for your business!</strong>
-                <div class="footer-note">
-                    This is a computer-generated invoice and does not require a signature.
+                <div class="footer-section">
+                    <div class="footer-title">Terms & Conditions</div>
+                    <ul class="footer-list">
+                        <li>Online download only. No physical delivery.</li>
+                        <li>Goods once sold will not be taken back or exchanged.</li>
+                        <li>Seller is not responsible for any loss or damage of goods in transit.</li>
+                    </ul>
+                </div>
+                <div class="footer-section" style="text-align: right;">
+                    <div class="footer-title">Company Details</div>
+                    <div>Company PAN: CANPJ8390R</div>
+                    <div>Company GSTIN/UIN: 08CANPJ3390R1ZT</div>
                 </div>
             </div>
         </div>
@@ -371,7 +245,7 @@ export async function generateInvoicePDF(bill: Bill): Promise<string> {
     const filepath = path.join(invoicesDir, filename);
 
     // Generate HTML
-    const html = generateInvoiceHTML(bill);
+    const html = generateInvoiceHTML(bill, bill.invoiceNumber || undefined);
 
     // Launch Puppeteer and generate PDF
     const browser = await puppeteer.launch({

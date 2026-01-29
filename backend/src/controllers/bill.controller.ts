@@ -22,6 +22,26 @@ function calculatePayableAmount(quantity: number, price: number, taxPercent: num
     return parseFloat(total.toFixed(2));
 }
 
+// Generate Invoice Number (STA3000+)
+async function generateInvoiceNumber(): Promise<string> {
+    const lastBill = await prisma.bill.findFirst({
+        where: { invoiceNumber: { not: null } },
+        orderBy: { createdAt: 'desc' },
+    });
+
+    if (!lastBill || !lastBill.invoiceNumber) {
+        return 'STA3000';
+    }
+
+    const match = lastBill.invoiceNumber.match(/STA(\d+)/);
+    if (!match) {
+        return 'STA3000';
+    }
+
+    const nextNum = parseInt(match[1], 10) + 1;
+    return `STA${nextNum}`;
+}
+
 export const billController = {
     // Get all bills (admin only)
     async getAllBills(_req: Request, res: Response): Promise<any> {
@@ -81,80 +101,38 @@ export const billController = {
             } = req.body;
 
             // Validation
-            if (!userId) {
-                return res.status(400).json({ error: 'User ID is required' });
-            }
-
+            if (!userId) return res.status(400).json({ error: 'User ID is required' });
             if (!company || !email || !phone || !companyAddress || !state || !pin || !gst) {
                 return res.status(400).json({ error: 'Missing required company details' });
             }
-
             if (!productName || !skuId || !quantity || !price || !currency) {
                 return res.status(400).json({ error: 'Missing required product details' });
             }
 
-            // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                return res.status(400).json({ error: 'Invalid email address' });
-            }
+            if (!emailRegex.test(email)) return res.status(400).json({ error: 'Invalid email address' });
+            if (!/^\d{10}$/.test(phone)) return res.status(400).json({ error: 'Phone must be 10 digits' });
+            if (!/^\d{6}$/.test(pin)) return res.status(400).json({ error: 'PIN must be 6 digits' });
+            if (!/^[A-Z0-9]{15}$/.test(gst)) return res.status(400).json({ error: 'GST must be 15 alphanumeric characters' });
+            if (quantity <= 0 || !Number.isInteger(quantity)) return res.status(400).json({ error: 'Quantity must be a positive integer' });
+            if (price <= 0) return res.status(400).json({ error: 'Price must be greater than 0' });
+            if (!['USD', 'INR'].includes(currency)) return res.status(400).json({ error: 'Invalid currency' });
+            if (shippingCharge < 0) return res.status(400).json({ error: 'Shipping charge cannot be negative' });
+            if (taxPercent < 0 || taxPercent > 100) return res.status(400).json({ error: 'Tax must be between 0 and 100' });
 
-            // Phone validation (10 digits)
-            if (!/^\d{10}$/.test(phone)) {
-                return res.status(400).json({ error: 'Phone must be 10 digits' });
-            }
-
-            // PIN validation (6 digits)
-            if (!/^\d{6}$/.test(pin)) {
-                return res.status(400).json({ error: 'PIN must be 6 digits' });
-            }
-
-            // GST validation (15 alphanumeric characters)
-            if (!/^[A-Z0-9]{15}$/.test(gst)) {
-                return res.status(400).json({ error: 'GST must be 15 alphanumeric characters' });
-            }
-
-            // Quantity validation
-            if (quantity <= 0 || !Number.isInteger(quantity)) {
-                return res.status(400).json({ error: 'Quantity must be a positive integer' });
-            }
-
-            // Price validation
-            if (price <= 0) {
-                return res.status(400).json({ error: 'Price must be greater than 0' });
-            }
-
-            // Currency validation
-            if (!['USD', 'INR'].includes(currency)) {
-                return res.status(400).json({ error: 'Invalid currency' });
-            }
-
-            // Shipping charge validation
-            if (shippingCharge < 0) {
-                return res.status(400).json({ error: 'Shipping charge cannot be negative' });
-            }
-
-            // Tax validation
-            if (taxPercent < 0 || taxPercent > 100) {
-                return res.status(400).json({ error: 'Tax must be between 0 and 100' });
-            }
-
-            // Generate unique transaction ID
+            // Generate IDs
             const transactionId = generateTransactionId();
+            const invoiceNumber = await generateInvoiceNumber();
 
-            // Calculate payable amount (always calculate server-side for security)
-            const payableAmount = calculatePayableAmount(
-                quantity,
-                price,
-                taxPercent || 0,
-                shippingCharge || 0
-            );
+            // Calculate Amount
+            const payableAmount = calculatePayableAmount(quantity, price, taxPercent || 0, shippingCharge || 0);
 
-            // Create bill in database
+            // Create Bill
             const bill = await prisma.bill.create({
                 data: {
-                    userId, // Save the userId
+                    userId,
                     transactionId,
+                    invoiceNumber,
                     company,
                     email,
                     phone,
@@ -171,20 +149,14 @@ export const billController = {
                     shippingCharge: shippingCharge || 0,
                     taxPercent: taxPercent || 0,
                     payableAmount,
-                    invoiceUrl: null, // Will be updated after PDF generation
+                    invoiceUrl: null,
                 },
             });
 
-            // Find user by provided userId to create transaction and update wallet
-            const user = await prisma.user.findUnique({
-                where: { userId: userId }
-            });
+            // Update User Wallet & Transaction
+            const user = await prisma.user.findUnique({ where: { userId } });
+            if (!user) return res.status(404).json({ error: `User with ID '${userId}' not found` });
 
-            if (!user) {
-                return res.status(404).json({ error: `User with ID '${userId}' not found` });
-            }
-
-            // Create DEBIT transaction for the bill
             await prisma.transaction.create({
                 data: {
                     transactionId,
@@ -193,53 +165,39 @@ export const billController = {
                     type: 'DEBIT',
                     status: 'SUCCESS',
                     paymentMethod: 'RAZORPAY_WALLET',
-                    description: `Bill payment for ${productName} (${transactionId})`,
+                    description: `Bill payment for ${productName} (Inv: ${invoiceNumber})`,
                 },
             });
 
-            // Deduct amount from user's wallet
             await prisma.user.update({
                 where: { userId: user.userId },
-                data: {
-                    walletBalance: user.walletBalance - payableAmount,
-                },
+                data: { walletBalance: user.walletBalance - payableAmount },
             });
 
-            // Generate PDF invoice asynchronously
+            // Generate PDF
             try {
                 const invoiceUrl = await generateInvoicePDF(bill);
+                await prisma.bill.update({ where: { id: bill.id }, data: { invoiceUrl } });
 
-                // Update bill with invoice URL
-                const updatedBill = await prisma.bill.update({
-                    where: { id: bill.id },
-                    data: { invoiceUrl },
-                });
-
-                res.status(201).json({ bill: updatedBill });
+                const finalBill = await prisma.bill.findUnique({ where: { id: bill.id } });
+                res.status(201).json({ bill: finalBill });
             } catch (pdfError) {
                 console.error('PDF generation error:', pdfError);
-                // Return bill even if PDF generation fails
-                res.status(201).json({
-                    bill,
-                    warning: 'Bill created but invoice generation failed. Please try again later.',
-                });
+                res.status(201).json({ bill, warning: 'Invoice generation failed.' });
             }
+
         } catch (error) {
             console.error('Create bill error:', error);
             res.status(500).json({ error: 'Failed to create bill' });
         }
     },
 
-    // Get customer's bills (customer only - returns their own bills)
+    // Get customer's bills
     async getCustomerBills(req: Request, res: Response): Promise<any> {
         try {
             const userId = (req as any).userIdString;
+            if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-            if (!userId) {
-                return res.status(401).json({ error: 'Unauthorized' });
-            }
-
-            // Find bills linked by userId OR email matches (for backward compatibility)
             const bills = await prisma.bill.findMany({
                 where: {
                     OR: [
@@ -248,9 +206,7 @@ export const billController = {
                         { company: { contains: userId } },
                     ]
                 },
-                orderBy: {
-                    transactionDate: 'desc',
-                },
+                orderBy: { transactionDate: 'desc' },
             });
 
             res.json({ bills });

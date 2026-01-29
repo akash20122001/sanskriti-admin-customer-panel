@@ -188,6 +188,9 @@ export default function BillsPage() {
                                 <thead>
                                     <tr className="border-b border-gray-200">
                                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                            Invoice No
+                                        </th>
+                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                                             Transaction ID
                                         </th>
                                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
@@ -216,6 +219,11 @@ export default function BillsPage() {
                                             key={bill.id}
                                             className="border-b border-gray-100 hover:bg-gray-50"
                                         >
+                                            <td className="py-3 px-4">
+                                                <span className="font-semibold text-primary text-sm">
+                                                    {bill.invoiceNumber || '-'}
+                                                </span>
+                                            </td>
                                             <td className="py-3 px-4">
                                                 <span className="font-medium text-gray-900 font-mono text-sm">
                                                     {bill.transactionId}

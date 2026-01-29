@@ -60,6 +60,7 @@ export interface Transaction {
 export interface Bill {
     id: string;
     transactionId: string;
+    invoiceNumber?: string;
     transactionDate: string;
 
     // Company Details

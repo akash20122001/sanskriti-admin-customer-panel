@@ -7,6 +7,7 @@ import { billService } from '@/services/bill.service';
 interface Bill {
     id: string;
     transactionId: string;
+    invoiceNumber?: string;
     company: string;
     email: string;
     productName: string;
@@ -54,6 +55,7 @@ export default function CustomerBills() {
         const filtered = bills.filter(
             (bill) =>
                 bill.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (bill.invoiceNumber && bill.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 bill.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 bill.skuId.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -92,7 +94,7 @@ export default function CustomerBills() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                     type="text"
-                    placeholder="Search by Transaction ID, Product, or SKU..."
+                    placeholder="Search by Invoice No, Transaction ID, Product..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 bg-white dark:bg-dark-bg-secondary"
@@ -105,6 +107,9 @@ export default function CustomerBills() {
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Invoice No
+                                </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Transaction ID
                                 </th>
@@ -128,7 +133,7 @@ export default function CustomerBills() {
                         <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-gray-700">
                             {filteredBills.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                         <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
                                         <p>No bills found</p>
                                     </td>
@@ -139,6 +144,11 @@ export default function CustomerBills() {
                                         key={bill.id}
                                         className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
                                     >
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-sm font-semibold text-primary">
+                                                {bill.invoiceNumber || '-'}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="text-sm font-mono text-gray-900 dark:text-white">
                                                 {bill.transactionId}
