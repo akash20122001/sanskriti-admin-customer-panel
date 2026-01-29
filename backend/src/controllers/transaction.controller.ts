@@ -45,7 +45,7 @@ export const transactionController = {
     },
 
     // Get all transactions (admin only - includes user details)
-    async getAllTransactions(req: Request, res: Response): Promise<any> {
+    async getAllTransactions(res: Response): Promise<any> {
         try {
             const transactions = await prisma.transaction.findMany({
                 orderBy: {

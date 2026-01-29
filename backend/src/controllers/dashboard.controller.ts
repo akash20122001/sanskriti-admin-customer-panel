@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export const dashboardController = {
     // Get admin dashboard statistics
-    async getAdminStats(req: Request, res: Response): Promise<any> {
+    async getAdminStats( res: Response): Promise<any> {
         try {
             // 1. Total Users
             const totalUsers = await prisma.user.count({
