@@ -8,8 +8,15 @@ import UsersPage from '@/pages/admin/Users';
 import OrdersPage from '@/pages/admin/Orders';
 import BillsPage from '@/pages/admin/Bills';
 
-// Placeholder components for future implementation
-const CustomerDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Customer Dashboard</h1></div>;
+// Customer Pages
+import CustomerLayout from '@/layouts/CustomerLayout';
+import CustomerDashboard from '@/pages/customer/Dashboard';
+import AddBalance from '@/pages/customer/AddBalance';
+import Transactions from '@/pages/customer/Transactions';
+import CustomerOrders from '@/pages/customer/Orders';
+import CustomerBills from '@/pages/customer/Bills';
+import Profile from '@/pages/customer/Profile';
+
 const Unauthorized = () => (
     <div className="h-screen flex items-center justify-center">
         <div className="text-center">
@@ -76,10 +83,38 @@ const router = createBrowserRouter([
         element: <ProtectedRoute allowedRoles={['CUSTOMER']} />,
         children: [
             {
-                path: 'dashboard',
-                element: <CustomerDashboard />,
+                element: <CustomerLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <Navigate to="/customer/dashboard" replace />,
+                    },
+                    {
+                        path: 'dashboard',
+                        element: <CustomerDashboard />,
+                    },
+                    {
+                        path: 'add-balance',
+                        element: <AddBalance />,
+                    },
+                    {
+                        path: 'transactions',
+                        element: <Transactions />,
+                    },
+                    {
+                        path: 'orders',
+                        element: <CustomerOrders />,
+                    },
+                    {
+                        path: 'bills',
+                        element: <CustomerBills />,
+                    },
+                    {
+                        path: 'profile',
+                        element: <Profile />,
+                    },
+                ],
             },
-            // Add more customer routes here
         ],
     },
 ]);

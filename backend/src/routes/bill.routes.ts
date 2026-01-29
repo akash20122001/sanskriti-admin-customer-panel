@@ -5,10 +5,13 @@ import { requireAdmin } from '../middleware/role.middleware';
 
 const router = Router();
 
-// Protect all bill routes - admin only
+// Customer routes (authenticated users can see their own bills)
+router.get('/customer/my-bills', authenticateToken, billController.getCustomerBills);
+
+// Protect all other bill routes - admin only
 router.use(authenticateToken, requireAdmin);
 
-// Bill routes
+// Admin bill routes
 router.get('/', billController.getAllBills);
 router.get('/:id', billController.getBillById);
 router.post('/', billController.createBill);

@@ -62,4 +62,18 @@ export const billService = {
         }
         return `${API_URL.replace('/api', '')}${bill.invoiceUrl}`;
     },
+
+    async getCustomerBills(): Promise<any> {
+        const response = await fetch(`${API_URL}/bills/customer/my-bills`, {
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch bills');
+        }
+
+        const data = await response.json();
+        return data;
+    },
 };

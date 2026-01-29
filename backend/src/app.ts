@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import orderRoutes from './routes/order.routes';
 import billRoutes from './routes/bill.routes';
+import transactionRoutes from './routes/transaction.routes';
 import { seedDatabase } from './controllers/seed.controller';
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/bills', billRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Serve static invoices
 app.use('/invoices', express.static(path.join(__dirname, '../invoices')));

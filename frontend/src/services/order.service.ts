@@ -86,4 +86,18 @@ export const orderService = {
         const data = await response.json();
         return data.order;
     },
+
+    async getCustomerOrders(): Promise<any> {
+        const response = await fetch(`${API_URL}/orders/customer/my-orders`, {
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch orders');
+        }
+
+        const data = await response.json();
+        return data;
+    },
 };

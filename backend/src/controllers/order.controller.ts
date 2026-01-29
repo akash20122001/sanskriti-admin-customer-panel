@@ -137,4 +137,30 @@ export const orderController = {
             res.status(500).json({ error: 'Failed to update order' });
         }
     },
+
+    // Get customer's orders (customer only - returns their own orders)
+    async getCustomerOrders(req: Request, res: Response): Promise<any> {
+        try {
+            const user = (req as any).user;
+
+            if (!user) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            // Get orders filtered by customer's userId
+            const orders = await prisma.order.findMany({
+                where: {
+                    userId: user.userId,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            });
+
+            res.json({ orders });
+        } catch (error) {
+            console.error('Get customer orders error:', error);
+            res.status(500).json({ error: 'Failed to fetch orders' });
+        }
+    },
 };

@@ -95,3 +95,30 @@ model Bill {
   @@index([transactionId])
   @@index([company])
 }
+
+model Transaction {
+  id              String   @id @default(uuid())
+  transactionId   String   @unique  // TXN-timestamp-RANDOM
+  userId          String
+  amount          Float
+  type            TransactionType   // CREDIT or DEBIT
+  status          TransactionStatus // PENDING, SUCCESS, FAILED
+  paymentMethod   String            // "TEST_PAYMENT", "RAZORPAY", "ADMIN_CREDIT", etc.
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([transactionId])
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}

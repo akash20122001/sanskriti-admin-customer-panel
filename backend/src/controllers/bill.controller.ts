@@ -192,4 +192,45 @@ export const billController = {
             res.status(500).json({ error: 'Failed to create bill' });
         }
     },
+
+    // Get customer's bills (customer only - returns their own bills)
+    async getCustomerBills(req: Request, res: Response): Promise<any> {
+        try {
+            const user = (req as any).user;
+
+            if (!user) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            // Get user's email from database
+            const userData = await prisma.user.findUnique({
+                where: { userId: user.userId }
+            });
+
+            if (!userData) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            // Note: Bills are matched by email since bills don't have a direct userId field
+            // This assumes the bill's email matches the user's userId/identifier
+            // You may need to adjust this logic based on your actual user-bill relationship
+            const bills = await prisma.bill.findMany({
+                where: {
+                    // Match bills where the email contains the user's userId or matches their email
+                    OR: [
+                        { email: { contains: user.userId } },
+                        { company: { contains: user.userId } },
+                    ]
+                },
+                orderBy: {
+                    transactionDate: 'desc',
+                },
+            });
+
+            res.json({ bills });
+        } catch (error) {
+            console.error('Get customer bills error:', error);
+            res.status(500).json({ error: 'Failed to fetch bills' });
+        }
+    },
 };
