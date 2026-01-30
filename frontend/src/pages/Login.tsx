@@ -190,10 +190,6 @@ export default function LoginPage() {
                         </Form>
                     </CardContent>
                     <CardFooter className="justify-center border-t border-gray-100 dark:border-dark-border pt-6 mt-2">
-                        <div className="text-center text-xs text-gray-500 space-y-1">
-                            <p>Default Admin: admin / admin123</p>
-                            <p>Default Customer: test_user / password123</p>
-                        </div>
                     </CardFooter>
                 </Card>
             </div>

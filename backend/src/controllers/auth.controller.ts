@@ -165,24 +165,3 @@ export const me = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-export const emergencyFix = async (_req: Request, res: Response): Promise<void> => {
-    try {
-        const hashedPassword = await bcrypt.hash('admin123', 10);
-        await prisma.user.upsert({
-            where: { userId: 'admin' },
-            update: { password: hashedPassword, role: 'ADMIN', isActive: true },
-            create: {
-                userId: 'admin',
-                name: 'System Admin',
-                password: hashedPassword,
-                role: 'ADMIN',
-                isActive: true,
-                walletBalance: 0
-            }
-        });
-        res.json({ success: true, message: 'Admin user created/updated with password: admin123' });
-    } catch (error) {
-        res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
-    }
-};
-
