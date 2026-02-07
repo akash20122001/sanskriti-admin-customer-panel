@@ -80,6 +80,26 @@ export default function OrdersPage() {
         return colors[platform as keyof typeof colors] || 'bg-gray-100 text-gray-800';
     };
 
+    // Status badge color mapping
+    const getStatusColor = (status: string) => {
+        const colors = {
+            IN_PROGRESS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+            SHIPPED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+            RTO: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+        };
+        return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    };
+
+    // Status display text
+    const getStatusText = (status: string) => {
+        const texts = {
+            IN_PROGRESS: 'In Progress',
+            SHIPPED: 'Shipped',
+            RTO: 'RTO',
+        };
+        return texts[status as keyof typeof texts] || status;
+    };
+
     // Currency symbol
     const getCurrencySymbol = (currency: string) => {
         return currency === 'USD' ? '$' : '₹';
@@ -207,6 +227,9 @@ export default function OrdersPage() {
                                             Platform
                                         </th>
                                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                            Status
+                                        </th>
+                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                                             Created
                                         </th>
                                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
@@ -245,6 +268,11 @@ export default function OrdersPage() {
                                             <td className="py-3 px-4">
                                                 <Badge className={getPlatformColor(order.platform)}>
                                                     {order.platform}
+                                                </Badge>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <Badge className={getStatusColor(order.status)}>
+                                                    {getStatusText(order.status)}
                                                 </Badge>
                                             </td>
                                             <td className="py-3 px-4">

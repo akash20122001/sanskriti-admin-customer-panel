@@ -18,6 +18,16 @@ model User {
   role          Role     @default(CUSTOMER)
   walletBalance Float    @default(0)
   isActive      Boolean  @default(true)
+  
+  // Company Details (optional, for customers)
+  company         String?
+  email           String?
+  phone           String?
+  companyAddress  String?
+  state           String?
+  pin             String?
+  gst             String?
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -30,15 +40,16 @@ enum Role {
 }
 
 model Order {
-  id        String   @id @default(uuid())
-  orderId   String   @unique
+  id        String      @id @default(uuid())
+  orderId   String      @unique
   userId    String
   skuId     String
   price     Float
   currency  Currency
   platform  Platform
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status    OrderStatus @default(IN_PROGRESS)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@index([userId])
   @@index([orderId])
@@ -54,6 +65,12 @@ enum Platform {
   Flipkart
   Meesho
   Etsy
+}
+
+enum OrderStatus {
+  IN_PROGRESS
+  SHIPPED
+  RTO
 }
 
 model Bill {

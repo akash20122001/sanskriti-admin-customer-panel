@@ -17,13 +17,15 @@ export default function UsersPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-    // Fetch users
+    // Fetch users (exclude ADMIN users)
     const fetchUsers = async () => {
         try {
             setLoading(true);
             const data = await userService.getAllUsers();
-            setUsers(data);
-            setFilteredUsers(data);
+            // Filter out ADMIN users - only show CUSTOMER users
+            const customerUsers = data.filter(user => user.role !== 'ADMIN');
+            setUsers(customerUsers);
+            setFilteredUsers(customerUsers);
         } catch (error) {
             toast.error('Failed to fetch users', {
                 description: (error as Error).message,
@@ -37,7 +39,7 @@ export default function UsersPage() {
         fetchUsers();
     }, []);
 
-    // Search filter
+    // Search filter (already filtered to exclude ADMIN)
     useEffect(() => {
         const filtered = users.filter(
             (user) =>

@@ -41,6 +41,7 @@ const orderSchema = z.object({
     platform: z.enum(['Amazon', 'Flipkart', 'Meesho', 'Etsy'], {
         message: 'Please select a platform'
     }),
+    status: z.enum(['IN_PROGRESS', 'SHIPPED', 'RTO']).optional(),
 });
 
 type OrderFormValues = z.infer<typeof orderSchema>;
@@ -62,6 +63,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
             price: undefined as any,
             currency: 'USD',
             platform: undefined,
+            status: 'IN_PROGRESS',
         },
     });
 
@@ -74,6 +76,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     price: order.price,
                     currency: order.currency,
                     platform: order.platform,
+                    status: order.status,
                 });
             } else {
                 form.reset({
@@ -82,6 +85,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     price: undefined as any,
                     currency: 'USD',
                     platform: undefined,
+                    status: 'IN_PROGRESS',
                 });
             }
         }
@@ -251,6 +255,32 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                             </FormItem>
                         )}
                     />
+
+                    {/* Status - Only in Edit Mode */}
+                    {isEditMode && (
+                        <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Status *</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger className="bg-white dark:bg-dark-bg-tertiary">
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                                            <SelectItem value="SHIPPED">Shipped</SelectItem>
+                                            <SelectItem value="RTO">RTO</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
                 </form>
             </Form>
         </CommonModal>

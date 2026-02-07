@@ -80,9 +80,10 @@ export default function AdminTransactions() {
 
 
     const getTypeBadgeColor = (type: string) => {
+        // For admin: CREDIT = customer adding money (green), DEBIT = revenue/income (blue)
         return type === 'CREDIT'
             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+            : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
     };
 
     const formatCurrency = (amount: number) => {
@@ -183,13 +184,12 @@ export default function AdminTransactions() {
                                                     ) : (
                                                         <ArrowUpCircle className="h-3 w-3 mr-1" />
                                                     )}
-                                                    {transaction.type}
+                                                    {transaction.type === 'CREDIT' ? 'CREDIT' : 'To Revenue'}
                                                 </Badge>
                                             </td>
                                             <td className="py-4">
-                                                <span className={transaction.type === 'CREDIT' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-                                                    {transaction.type === 'CREDIT' ? '+' : '-'}
-                                                    {formatCurrency(transaction.amount)}
+                                                <span className={transaction.type === 'CREDIT' ? 'text-green-600 font-medium' : 'text-blue-600 font-medium'}>
+                                                    +{formatCurrency(transaction.amount)}
                                                 </span>
                                             </td>
                                             <td className="py-4">

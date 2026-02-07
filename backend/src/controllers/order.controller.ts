@@ -69,6 +69,20 @@ export const orderController = {
                 return res.status(400).json({ error: 'Invalid platform' });
             }
 
+            // CRITICAL FIX: Check if user exists
+            const user = await prisma.user.findUnique({ where: { userId } });
+            if (!user) {
+                return res.status(404).json({ error: `User with ID '${userId}' not found` });
+            }
+
+            // CRITICAL FIX: Check if user has sufficient wallet balance
+            const orderPrice = parseFloat(price);
+            if (user.walletBalance < orderPrice) {
+                return res.status(400).json({
+                    error: `Insufficient wallet balance. User has ₹${user.walletBalance.toFixed(2)} but needs ₹${orderPrice.toFixed(2)}`
+                });
+            }
+
             // Generate unique order ID
             const orderId = generateOrderId();
 
@@ -77,7 +91,7 @@ export const orderController = {
                     orderId,
                     userId,
                     skuId,
-                    price: parseFloat(price),
+                    price: orderPrice,
                     currency,
                     platform,
                 },
@@ -94,7 +108,7 @@ export const orderController = {
     async updateOrder(req: Request, res: Response): Promise<any> {
         try {
             const id = req.params.id as string;
-            const { userId, skuId, price, currency, platform } = req.body;
+            const { userId, skuId, price, currency, platform, status } = req.body;
 
             // Check if order exists
             const existingOrder = await prisma.order.findUnique({
@@ -118,6 +132,10 @@ export const orderController = {
                 return res.status(400).json({ error: 'Invalid platform' });
             }
 
+            if (status && !['IN_PROGRESS', 'SHIPPED', 'RTO'].includes(status)) {
+                return res.status(400).json({ error: 'Invalid status' });
+            }
+
             // Prepare update data
             const updateData: any = {};
             if (userId !== undefined) updateData.userId = userId;
@@ -125,6 +143,7 @@ export const orderController = {
             if (price !== undefined) updateData.price = parseFloat(price);
             if (currency !== undefined) updateData.currency = currency;
             if (platform !== undefined) updateData.platform = platform;
+            if (status !== undefined) updateData.status = status;
 
             const order = await prisma.order.update({
                 where: { id },

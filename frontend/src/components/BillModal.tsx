@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { billService } from '@/services/bill.service';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react'; // Added import
+import { Loader2 } from 'lucide-react';
 import type { Bill } from '@/types';
 import { CommonModal } from '@/components/ui/commonModal';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -26,16 +26,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-// Validation schema
+// Simplified validation schema - only userId and product details
 const billSchema = z.object({
     userId: z.string().min(1, 'User ID is required'),
-    company: z.string().min(1, 'Company name is required'),
-    email: z.string().email('Invalid email address'),
-    phone: z.string().regex(/^\d{10}$/, 'Phone must be 10 digits'),
-    companyAddress: z.string().min(1, 'Company address is required'),
-    state: z.string().min(1, 'State is required'),
-    pin: z.string().regex(/^\d{6}$/, 'PIN must be 6 digits'),
-    gst: z.string().regex(/^[A-Z0-9]{15}$/, 'GST must be 15 alphanumeric characters (uppercase)'),
     productName: z.string().min(1, 'Product name is required'),
     skuId: z.string().min(1, 'SKU ID is required'),
     quantity: z.number().int().positive('Quantity must be a positive number'),
@@ -56,19 +49,12 @@ interface BillModalProps {
 export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
     const isEditMode = !!bill;
     const [payableAmount, setPayableAmount] = useState(0);
-    const [isDownloading, setIsDownloading] = useState(false); // Added state
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const form = useForm<BillFormValues>({
         resolver: zodResolver(billSchema),
         defaultValues: {
             userId: '',
-            company: '',
-            email: '',
-            phone: '',
-            companyAddress: '',
-            state: '',
-            pin: '',
-            gst: '',
             productName: '',
             skuId: '',
             quantity: 1,
@@ -108,13 +94,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
         if (isOpen) {
             if (bill) {
                 form.reset({
-                    company: bill.company,
-                    email: bill.email,
-                    phone: bill.phone,
-                    companyAddress: bill.companyAddress,
-                    state: bill.state,
-                    pin: bill.pin,
-                    gst: bill.gst,
+                    userId: bill.userId || '',
                     productName: bill.productName,
                     skuId: bill.skuId,
                     quantity: bill.quantity,
@@ -126,13 +106,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                 setPayableAmount(bill.payableAmount);
             } else {
                 form.reset({
-                    company: '',
-                    email: '',
-                    phone: '',
-                    companyAddress: '',
-                    state: '',
-                    pin: '',
-                    gst: '',
+                    userId: '',
                     productName: '',
                     skuId: '',
                     quantity: 1,
@@ -148,12 +122,8 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
 
     const onSubmit = async (data: BillFormValues) => {
         try {
-            const billData = {
-                ...data,
-                paymentMode: 'Razorpay Wallet',
-            };
-
-            await billService.createBill(billData as any);
+            // Backend will fetch user company details based on userId
+            await billService.createBill(data as any);
             toast.success('Bill created successfully! Invoice is being generated...');
 
             form.reset();
@@ -235,10 +205,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" id="bill-form">
-                    {/* Company Details */}
+                    {/* User & Company Details */}
                     <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b pb-2">
-                            Company Details
+                            Customer Details
                         </h3>
 
                         {/* User ID Field */}
@@ -250,7 +220,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     <FormLabel className="text-gray-700 dark:text-gray-300">Customer User ID *</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="customer_id"
+                                            placeholder="Enter customer user ID"
                                             {...field}
                                             className="bg-white dark:bg-dark-bg-tertiary"
                                             disabled={isEditMode}
@@ -260,117 +230,6 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                 </FormItem>
                             )}
                         />
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="company"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Company Name *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="ABC Corp" {...field} className="bg-white dark:bg-dark-bg-tertiary" disabled={isEditMode} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Email *</FormLabel>
-                                        <FormControl>
-                                            <Input type="email" placeholder="company@example.com" {...field} className="bg-white dark:bg-dark-bg-tertiary" disabled={isEditMode} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="phone"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Phone *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="1234567890" {...field} className="bg-white dark:bg-dark-bg-tertiary" disabled={isEditMode} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="gst"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">GST *</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="29ABCDE1234F1Z5"
-                                                {...field}
-                                                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
-                                                disabled={isEditMode}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="companyAddress"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-700 dark:text-gray-300">Company Address *</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="123 Main Street, City" {...field} className="bg-white dark:bg-dark-bg-tertiary" disabled={isEditMode} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="state"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">State *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Maharashtra" {...field} className="bg-white dark:bg-dark-bg-tertiary" disabled={isEditMode} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="pin"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">PIN Code *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="400001" {...field} className="bg-white dark:bg-dark-bg-tertiary" disabled={isEditMode} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
                     </div>
 
                     {/* Product Details */}

@@ -64,7 +64,7 @@ export const userController = {
     // Create new user (admin only)
     async createUser(req: Request, res: Response): Promise<any> {
         try {
-            const { userId, name, password, role, walletBalance, isActive } = req.body;
+            const { userId, name, password, role, walletBalance, isActive, company, email, phone, companyAddress, state, pin, gst } = req.body;
 
             // Validation
             if (!userId || !name || !password) {
@@ -92,6 +92,13 @@ export const userController = {
                     role: role || 'CUSTOMER',
                     walletBalance: walletBalance || 0,
                     isActive: isActive !== undefined ? isActive : true,
+                    company: company || null,
+                    email: email || null,
+                    phone: phone || null,
+                    companyAddress: companyAddress || null,
+                    state: state || null,
+                    pin: pin || null,
+                    gst: gst || null,
                 },
                 select: {
                     id: true,
@@ -100,6 +107,13 @@ export const userController = {
                     role: true,
                     walletBalance: true,
                     isActive: true,
+                    company: true,
+                    email: true,
+                    phone: true,
+                    companyAddress: true,
+                    state: true,
+                    pin: true,
+                    gst: true,
                     createdAt: true,
                     updatedAt: true,
                 },

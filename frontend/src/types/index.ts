@@ -8,6 +8,14 @@ export interface User {
     role: UserRole;
     walletBalance: number;
     isActive: boolean;
+    // Company Details (optional)
+    company?: string;
+    email?: string;
+    phone?: string;
+    companyAddress?: string;
+    state?: string;
+    pin?: string;
+    gst?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -27,6 +35,7 @@ export interface AuthResponse {
 // Order Types
 export type Currency = 'USD' | 'INR';
 export type Platform = 'Amazon' | 'Flipkart' | 'Meesho' | 'Etsy';
+export type OrderStatus = 'IN_PROGRESS' | 'SHIPPED' | 'RTO';
 
 export interface Order {
     id: string;
@@ -36,6 +45,7 @@ export interface Order {
     price: number;
     currency: Currency;
     platform: Platform;
+    status: OrderStatus;
     createdAt: string;
     updatedAt: string;
 }
@@ -59,6 +69,7 @@ export interface Transaction {
 // Bill/Invoice Types
 export interface Bill {
     id: string;
+    userId: string;
     transactionId: string;
     invoiceNumber?: string;
     transactionDate: string;

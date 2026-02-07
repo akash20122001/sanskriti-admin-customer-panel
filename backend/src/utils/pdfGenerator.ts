@@ -58,12 +58,12 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber: string | undefined, sett
 
     // Process Logo
     const logoPath = path.join(__dirname, '../assets/logo.png');
-    let logoHtml = '<div class="company-name" style="font-size: 24px; font-weight: bold;">SANSKRITI</div>';
+    let logoHtml = '<div class="company-name" style="font-size: 24px; font-weight: bold; color: #000;">SANSKRITI</div>';
 
     if (fs.existsSync(logoPath)) {
         try {
             const logoData = fs.readFileSync(logoPath).toString('base64');
-            logoHtml = `<img src="data:image/png;base64,${logoData}" alt="Logo" style="height: 60px; margin-bottom: 10px;" />`;
+            logoHtml = `<img src="data:image/png;base64,${logoData}" alt="Logo" style="height: 60px; margin-bottom: 5px;" />`;
         } catch (e) {
             console.error('Error reading logo:', e);
         }
@@ -80,31 +80,31 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber: string | undefined, sett
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: white; color: #333; }
             .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
-            .invoice-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; }
-            .invoice-title { font-size: 28px; font-weight: bold; margin-bottom: 5px; margin-top: 5px; }
+            .invoice-header { background: #ffffff; color: #000; padding: 20px 30px; text-align: center; border-bottom: 2px solid #000; }
+            .invoice-title { font-size: 28px; font-weight: bold; margin-bottom: 5px; margin-top: 10px; color: #000; }
             .transaction-info { background: #f8f9fa; padding: 15px 30px; border-bottom: 2px solid #e0e0e0; display: flex; justify-content: space-between; }
             .info-group { display: flex; flex-direction: column; gap: 3px; }
             .info-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-            .info-value { font-size: 14px; font-weight: 600; color: #333; }
+            .info-value { font-size: 14px; font-weight: 600; color: #000; }
             .invoice-body { padding: 20px 30px; }
             .section { margin-bottom: 20px; }
-            .section-title { font-size: 13px; font-weight: 600; color: #667eea; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; border-bottom: 2px solid #667eea; padding-bottom: 3px; }
+            .section-title { font-size: 13px; font-weight: 600; color: #000; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; border-bottom: 2px solid #000; padding-bottom: 3px; }
             .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px; }
             .detail-item { display: flex; flex-direction: column; gap: 2px; }
             .detail-label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.3px; }
-            .detail-value { font-size: 13px; color: #333; font-weight: 500; }
+            .detail-value { font-size: 13px; color: #000; font-weight: 500; }
             .product-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
             .product-table th { background: #f8f9fa; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666; border-bottom: 2px solid #e0e0e0; }
-            .product-table td { padding: 12px 10px; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
+            .product-table td { padding: 12px 10px; border-bottom: 1px solid #e0e0e0; font-size: 13px; color: #000; }
             .amount-breakdown { margin-top: 15px; background: #f8f9fa; border-radius: 6px; padding: 15px; }
-            .breakdown-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
-            .breakdown-row.total { border-top: 2px solid #667eea; margin-top: 8px; padding-top: 10px; font-size: 16px; font-weight: bold; color: #667eea; }
-            .payment-mode-box { background: #667eea; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-top: 15px; }
+            .breakdown-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: #000; }
+            .breakdown-row.total { border-top: 2px solid #000; margin-top: 8px; padding-top: 10px; font-size: 16px; font-weight: bold; color: #000; }
+            .payment-mode-box { background: #000; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-top: 15px; }
             .payment-mode-label { font-size: 10px; text-transform: uppercase; opacity: 0.9; margin-bottom: 3px; letter-spacing: 0.5px; }
             .payment-mode-value { font-size: 14px; font-weight: 600; }
             .invoice-footer { background: #f8f9fa; padding: 15px 30px; border-top: 2px solid #e0e0e0; font-size: 11px; color: #666; display: flex; justify-content: space-between; gap: 20px; }
             .footer-section { flex: 1; }
-            .footer-title { font-weight: bold; margin-bottom: 5px; color: #333; }
+            .footer-title { font-weight: bold; margin-bottom: 5px; color: #000; }
             .footer-list { list-style: none; padding: 0; }
             .footer-list li { margin-bottom: 3px; position: relative; padding-left: 10px; }
             .footer-list li::before { content: "•"; position: absolute; left: 0; }
@@ -116,17 +116,16 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber: string | undefined, sett
             <div class="invoice-header">
                 ${logoHtml}
                 <div class="invoice-title">INVOICE</div>
-                <div style="font-size: 14px; opacity: 0.9;">Invoice Number - ${invoiceNumber || ''}</div>
             </div>
             
-            <!-- Transaction Info -->
+            <!-- Invoice Number Info -->
             <div class="transaction-info">
                 <div class="info-group">
-                    <div class="info-label">Transaction ID</div>
-                    <div class="info-value">${bill.transactionId}</div>
+                    <div class="info-label">Invoice Number</div>
+                    <div class="info-value">${invoiceNumber || 'N/A'}</div>
                 </div>
                 <div class="info-group" style="text-align: right;">
-                    <div class="info-label">Transaction Date</div>
+                    <div class="info-label">Invoice Date</div>
                     <div class="info-value">${formatDate(bill.transactionDate)}</div>
                 </div>
             </div>
