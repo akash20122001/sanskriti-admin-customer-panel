@@ -50,7 +50,7 @@ export const orderController = {
     // Create new order (admin only)
     async createOrder(req: Request, res: Response): Promise<any> {
         try {
-            const { userId, skuId, price, currency, platform } = req.body;
+            const { userId, skuId, price, currency, platform, deliveryPartner, trackingId } = req.body;
 
             // Validation
             if (!userId || !skuId || !price || !currency || !platform) {
@@ -65,9 +65,7 @@ export const orderController = {
                 return res.status(400).json({ error: 'Invalid currency' });
             }
 
-            if (!['Amazon', 'Flipkart', 'Meesho', 'Etsy'].includes(platform)) {
-                return res.status(400).json({ error: 'Invalid platform' });
-            }
+            // Platform validation removed - now accepts any string value from Settings
 
             // CRITICAL FIX: Check if user exists
             const user = await prisma.user.findUnique({ where: { userId } });
@@ -94,6 +92,8 @@ export const orderController = {
                     price: orderPrice,
                     currency,
                     platform,
+                    deliveryPartner: deliveryPartner || null,
+                    trackingId: trackingId || null,
                 },
             });
 
@@ -108,7 +108,7 @@ export const orderController = {
     async updateOrder(req: Request, res: Response): Promise<any> {
         try {
             const id = req.params.id as string;
-            const { userId, skuId, price, currency, platform, status } = req.body;
+            const { userId, skuId, price, currency, platform, status, deliveryPartner, trackingId } = req.body;
 
             // Check if order exists
             const existingOrder = await prisma.order.findUnique({
@@ -128,9 +128,7 @@ export const orderController = {
                 return res.status(400).json({ error: 'Invalid currency' });
             }
 
-            if (platform && !['Amazon', 'Flipkart', 'Meesho', 'Etsy'].includes(platform)) {
-                return res.status(400).json({ error: 'Invalid platform' });
-            }
+            // Platform validation removed - now accepts any string value from Settings
 
             if (status && !['IN_PROGRESS', 'SHIPPED', 'RTO'].includes(status)) {
                 return res.status(400).json({ error: 'Invalid status' });
@@ -144,6 +142,8 @@ export const orderController = {
             if (currency !== undefined) updateData.currency = currency;
             if (platform !== undefined) updateData.platform = platform;
             if (status !== undefined) updateData.status = status;
+            if (deliveryPartner !== undefined) updateData.deliveryPartner = deliveryPartner || null;
+            if (trackingId !== undefined) updateData.trackingId = trackingId || null;
 
             const order = await prisma.order.update({
                 where: { id },

@@ -10,7 +10,10 @@ export const settingsController = {
             let settings = await prisma.settings.findFirst();
             if (!settings) {
                 settings = await prisma.settings.create({
-                    data: {} // Uses default values from schema
+                    data: {
+                        sellingPlatforms: ['Amazon', 'Flipkart', 'Meesho', 'Etsy'],
+                        deliveryPartners: ['Delhivery', 'Blue Dart', 'DTDC', 'India Post']
+                    } // Default values
                 });
             }
             res.json(settings);
@@ -23,22 +26,29 @@ export const settingsController = {
     // Update settings
     async updateSettings(req: Request, res: Response): Promise<any> {
         try {
-            const { companyPan, companyGst } = req.body;
+            const { companyPan, companyGst, sellingPlatforms, deliveryPartners } = req.body;
 
-            if (!companyPan || !companyGst) {
-                return res.status(400).json({ error: 'Company PAN and GST are required' });
-            }
+            // Build update data object
+            const updateData: any = {};
+            if (companyPan !== undefined) updateData.companyPan = companyPan;
+            if (companyGst !== undefined) updateData.companyGst = companyGst;
+            if (sellingPlatforms !== undefined) updateData.sellingPlatforms = sellingPlatforms;
+            if (deliveryPartners !== undefined) updateData.deliveryPartners = deliveryPartners;
 
             let settings = await prisma.settings.findFirst();
 
             if (settings) {
                 settings = await prisma.settings.update({
                     where: { id: settings.id },
-                    data: { companyPan, companyGst }
+                    data: updateData
                 });
             } else {
                 settings = await prisma.settings.create({
-                    data: { companyPan, companyGst }
+                    data: {
+                        ...updateData,
+                        sellingPlatforms: sellingPlatforms || ['Amazon', 'Flipkart', 'Meesho', 'Etsy'],
+                        deliveryPartners: deliveryPartners || ['Delhivery', 'Blue Dart', 'DTDC', 'India Post']
+                    }
                 });
             }
 

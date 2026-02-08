@@ -3,6 +3,7 @@ import { Home, Wallet, Receipt, ShoppingBag, FileText, User, LogOut, Menu, X } f
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Button } from './ui/button';
+import logo from '../assets/circle-sanskriti-logo.png';
 
 interface NavItem {
     name: string;
@@ -55,9 +56,14 @@ export default function CustomerSidebar() {
             >
                 {/* Logo/Brand */}
                 <div className="p-6 border-b border-white/10 flex flex-col items-center">
-                    <img src="/logo.png" alt="Sanskriti Logo" className="h-24 w-auto mb-2" />
-                    <h1 className="text-xl font-bold">Customer Portal</h1>
-                    <p className="text-sm text-white/70 mt-1">{user?.name || 'Welcome'}</p>
+                    <img src={logo} alt="Sanskriti Logo" className="h-24 w-auto mb-3" />
+                    <div className="text-center mb-2">
+                        <h2 className="text-xl font-bold text-white font-serif tracking-wide">Sanskriti</h2>
+                        <span className="text-sm font-normal text-white/80 font-serif">The Antique</span>
+                    </div>
+                    <div className="w-full h-px bg-white/10 my-2" />
+                    <h1 className="text-sm font-semibold uppercase tracking-wider text-white/90">Customer Portal</h1>
+                    <p className="text-xs text-white/60 mt-1">{user?.name || 'Welcome'}</p>
                 </div>
 
                 {/* Navigation */}

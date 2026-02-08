@@ -3,6 +3,7 @@ import { LayoutDashboard, Users, ShoppingCart, FileText, CreditCard, Settings, L
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Button } from './ui/button';
+import logo from '../assets/circle-sanskriti-logo.png';
 
 interface NavItem {
     name: string;
@@ -66,8 +67,12 @@ export default function Sidebar() {
             >
                 {/* Logo Section */}
                 <div className="p-6 border-b border-primary-light/30 flex flex-col items-center">
-                    <img src="/logo.png" alt="Sanskriti Logo" className="h-24 w-auto mb-2" />
-                    <p className="text-xs text-gray-300 mt-1 font-medium bg-white/10 px-2 py-0.5 rounded-full">Admin Panel</p>
+                    <img src={logo} alt="Sanskriti Logo" className="h-24 w-auto mb-3" />
+                    <h1 className="text-xl font-bold text-white mb-1 text-center font-serif tracking-wide">
+                        Sanskriti <br />
+                        <span className="text-sm font-normal text-gray-200">The Antique</span>
+                    </h1>
+                    <p className="text-xs text-gray-300 mt-2 font-medium bg-white/10 px-2 py-0.5 rounded-full">Admin Panel</p>
                 </div>
 
                 {/* Navigation */}

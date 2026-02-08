@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button'; // Assuming you have Button
-import { Input } from '@/components/ui/input'; // Assuming you have Input
-import { Label } from '@/components/ui/label'; // Assuming you have Label
-import { settingsService, type Settings } from '@/services/settings.service';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { settingsService } from '@/services/settings.service';
 import { toast } from 'sonner';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Plus, X } from 'lucide-react';
 
 export default function AdminSettings() {
-    const [_, setSettings] = useState<Settings | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
         companyPan: '',
         companyGst: '',
+        sellingPlatforms: [] as string[],
+        deliveryPartners: [] as string[],
     });
+    const [newPlatform, setNewPlatform] = useState('');
+    const [newPartner, setNewPartner] = useState('');
 
     useEffect(() => {
         fetchSettings();
@@ -23,10 +26,11 @@ export default function AdminSettings() {
     const fetchSettings = async () => {
         try {
             const data = await settingsService.getSettings();
-            setSettings(data);
             setFormData({
                 companyPan: data.companyPan,
                 companyGst: data.companyGst,
+                sellingPlatforms: Array.isArray(data.sellingPlatforms) ? data.sellingPlatforms : [],
+                deliveryPartners: Array.isArray(data.deliveryPartners) ? data.deliveryPartners : [],
             });
         } catch (error) {
             toast.error('Failed to load settings');
@@ -40,8 +44,7 @@ export default function AdminSettings() {
         e.preventDefault();
         try {
             setSaving(true);
-            const updated = await settingsService.updateSettings(formData);
-            setSettings(updated);
+            await settingsService.updateSettings(formData);
             toast.success('Settings saved successfully');
         } catch (error) {
             toast.error('Failed to save settings');
@@ -49,6 +52,40 @@ export default function AdminSettings() {
         } finally {
             setSaving(false);
         }
+    };
+
+    const addPlatform = () => {
+        if (newPlatform.trim() && !formData.sellingPlatforms.includes(newPlatform.trim())) {
+            setFormData({
+                ...formData,
+                sellingPlatforms: [...formData.sellingPlatforms, newPlatform.trim()]
+            });
+            setNewPlatform('');
+        }
+    };
+
+    const removePlatform = (platform: string) => {
+        setFormData({
+            ...formData,
+            sellingPlatforms: formData.sellingPlatforms.filter(p => p !== platform)
+        });
+    };
+
+    const addPartner = () => {
+        if (newPartner.trim() && !formData.deliveryPartners.includes(newPartner.trim())) {
+            setFormData({
+                ...formData,
+                deliveryPartners: [...formData.deliveryPartners, newPartner.trim()]
+            });
+            setNewPartner('');
+        }
+    };
+
+    const removePartner = (partner: string) => {
+        setFormData({
+            ...formData,
+            deliveryPartners: formData.deliveryPartners.filter(p => p !== partner)
+        });
     };
 
     if (loading) {
@@ -66,12 +103,12 @@ export default function AdminSettings() {
                 <p className="text-gray-600 dark:text-gray-400 mt-1">Manage global system settings</p>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Company Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Company Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="pan">Company PAN</Label>
                             <Input
@@ -93,28 +130,104 @@ export default function AdminSettings() {
                                 required
                             />
                         </div>
+                    </CardContent>
+                </Card>
 
-                        <div className="pt-4">
-                            <Button type="submit" disabled={saving} className="w-full sm:w-auto text-white">
-                                {saving ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-4 h-4 mr-2" />
-                                        Save Changes
-                                    </>
-                                )}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Selling Platforms</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                            {formData.sellingPlatforms.map((platform) => (
+                                <div
+                                    key={platform}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium"
+                                >
+                                    {platform}
+                                    <button
+                                        type="button"
+                                        onClick={() => removePlatform(platform)}
+                                        className="hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded-full p-0.5 transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Add new platform (e.g., Amazon, Flipkart)"
+                                value={newPlatform}
+                                onChange={(e) => setNewPlatform(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPlatform())}
+                            />
+                            <Button type="button" onClick={addPlatform} variant="outline" size="icon">
+                                <Plus className="w-4 h-4" />
                             </Button>
                         </div>
-                    </form>
-                </CardContent>
-            </Card>
+                        <p className="text-sm text-gray-500">These platforms will appear in the order creation form.</p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Delivery Partners</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                            {formData.deliveryPartners.map((partner) => (
+                                <div
+                                    key={partner}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium"
+                                >
+                                    {partner}
+                                    <button
+                                        type="button"
+                                        onClick={() => removePartner(partner)}
+                                        className="hover:bg-green-200 dark:hover:bg-green-800/50 rounded-full p-0.5 transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Add new delivery partner (e.g., Delhivery)"
+                                value={newPartner}
+                                onChange={(e) => setNewPartner(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPartner())}
+                            />
+                            <Button type="button" onClick={addPartner} variant="outline" size="icon">
+                                <Plus className="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <p className="text-sm text-gray-500">These delivery partners will appear in the order creation form.</p>
+                    </CardContent>
+                </Card>
+
+                <div className="flex gap-4">
+                    <Button type="submit" disabled={saving} className="w-full sm:w-auto text-white">
+                        {saving ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4 mr-2" />
+                                Save Changes
+                            </>
+                        )}
+                    </Button>
+                </div>
+            </form>
 
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-sm text-blue-700 dark:text-blue-300">
-                <p>These details will be displayed in the footer of all generated PDF invoices.</p>
+                <p>Company details will be displayed in PDF invoices. Platforms and delivery partners can be managed here and will be available in order creation.</p>
             </div>
         </div>
     );

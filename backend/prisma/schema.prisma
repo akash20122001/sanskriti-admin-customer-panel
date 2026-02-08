@@ -40,16 +40,18 @@ enum Role {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  orderId   String      @unique
-  userId    String
-  skuId     String
-  price     Float
-  currency  Currency
-  platform  Platform
-  status    OrderStatus @default(IN_PROGRESS)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id              String      @id @default(uuid())
+  orderId         String      @unique
+  userId          String
+  skuId           String
+  price           Float
+  currency        Currency
+  platform        String      // Changed from enum to String for dynamic values
+  status          OrderStatus @default(IN_PROGRESS)
+  deliveryPartner String?     // NEW: Delivery partner name
+  trackingId      String?     // NEW: Tracking ID for shipment
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@index([userId])
   @@index([orderId])
@@ -60,6 +62,7 @@ enum Currency {
   INR
 }
 
+// Keep Platform enum for backward compatibility but allow string values in Order
 enum Platform {
   Amazon
   Flipkart
@@ -146,8 +149,10 @@ enum TransactionStatus {
 }
 
 model Settings {
-  id          String   @id @default(uuid())
-  companyPan  String   @default("CANPJ8390R")
-  companyGst  String   @default("08CANPJ3390R1ZT")
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(uuid())
+  companyPan        String   @default("CANPJ8390R")
+  companyGst        String   @default("08CANPJ3390R1ZT")
+  sellingPlatforms  Json     @default("[]") // Array of platform names
+  deliveryPartners  Json     @default("[]") // Array of delivery partner names
+  updatedAt         DateTime @updatedAt
 }

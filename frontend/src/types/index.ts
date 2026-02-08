@@ -34,7 +34,7 @@ export interface AuthResponse {
 
 // Order Types
 export type Currency = 'USD' | 'INR';
-export type Platform = 'Amazon' | 'Flipkart' | 'Meesho' | 'Etsy';
+export type Platform = string; // Changed from enum to string for dynamic platforms
 export type OrderStatus = 'IN_PROGRESS' | 'SHIPPED' | 'RTO';
 
 export interface Order {
@@ -44,8 +44,10 @@ export interface Order {
     skuId: string;
     price: number;
     currency: Currency;
-    platform: Platform;
+    platform: string; // Platform name from settings
     status: OrderStatus;
+    deliveryPartner?: string; // NEW: Delivery partner name
+    trackingId?: string; // NEW: Tracking ID
     createdAt: string;
     updatedAt: string;
 }

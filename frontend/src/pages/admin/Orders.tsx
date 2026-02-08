@@ -230,6 +230,12 @@ export default function OrdersPage() {
                                             Status
                                         </th>
                                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                            Delivery Partner
+                                        </th>
+                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                            Tracking ID
+                                        </th>
+                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                                             Created
                                         </th>
                                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
@@ -274,6 +280,16 @@ export default function OrdersPage() {
                                                 <Badge className={getStatusColor(order.status)}>
                                                     {getStatusText(order.status)}
                                                 </Badge>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-sm text-gray-700">
+                                                    {order.deliveryPartner || '-'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-sm text-gray-600 font-mono">
+                                                    {order.trackingId || '-'}
+                                                </span>
                                             </td>
                                             <td className="py-3 px-4">
                                                 <span className="text-sm text-gray-600">

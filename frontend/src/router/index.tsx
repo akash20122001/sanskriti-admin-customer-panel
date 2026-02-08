@@ -19,6 +19,12 @@ import CustomerOrders from '@/pages/customer/Orders';
 import CustomerBills from '@/pages/customer/Bills';
 import Profile from '@/pages/customer/Profile';
 
+// Public Pages
+import TermsPrivacy from '@/pages/TermsPrivacy';
+
+// Components
+import RootRedirect from '@/components/RootRedirect';
+
 const Unauthorized = () => (
     <div className="h-screen flex items-center justify-center">
         <div className="text-center">
@@ -43,7 +49,11 @@ const router = createBrowserRouter([
     },
     {
         path: '/',
-        element: <Navigate to="/login" replace />,
+        element: <RootRedirect />,
+    },
+    {
+        path: '/terms-privacy',
+        element: <TermsPrivacy />,
     },
 
     // Admin Routes

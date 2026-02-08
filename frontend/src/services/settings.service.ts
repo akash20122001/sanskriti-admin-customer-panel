@@ -12,6 +12,8 @@ export interface Settings {
     id: string;
     companyPan: string;
     companyGst: string;
+    sellingPlatforms: string[]; // NEW: Dynamic selling platforms
+    deliveryPartners: string[]; // NEW: Dynamic delivery partners
     updatedAt: string;
 }
 
@@ -26,7 +28,12 @@ export const settingsService = {
         return response.json();
     },
 
-    async updateSettings(data: { companyPan: string; companyGst: string }): Promise<Settings> {
+    async updateSettings(data: {
+        companyPan?: string;
+        companyGst?: string;
+        sellingPlatforms?: string[];
+        deliveryPartners?: string[];
+    }): Promise<Settings> {
         const response = await fetch(`${API_URL}/settings`, {
             method: 'PUT',
             headers: getAuthHeaders(),

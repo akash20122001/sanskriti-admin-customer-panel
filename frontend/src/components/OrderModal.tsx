@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { orderService } from '@/services/order.service';
+import { settingsService } from '@/services/settings.service';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import type { Order } from '@/types';
@@ -38,10 +39,10 @@ const orderSchema = z.object({
         .min(0.01, 'Price must be greater than 0')
         .positive('Price must be positive'),
     currency: z.enum(['USD', 'INR']),
-    platform: z.enum(['Amazon', 'Flipkart', 'Meesho', 'Etsy'], {
-        message: 'Please select a platform'
-    }),
+    platform: z.string().min(1, 'Please select a platform'),
     status: z.enum(['IN_PROGRESS', 'SHIPPED', 'RTO']).optional(),
+    deliveryPartner: z.string().optional(),
+    trackingId: z.string().optional(),
 });
 
 type OrderFormValues = z.infer<typeof orderSchema>;
@@ -54,6 +55,9 @@ interface OrderModalProps {
 
 export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) {
     const isEditMode = !!order;
+    const [platforms, setPlatforms] = useState<string[]>([]);
+    const [deliveryPartners, setDeliveryPartners] = useState<string[]>([]);
+    const [loadingSettings, setLoadingSettings] = useState(true);
 
     const form = useForm<OrderFormValues>({
         resolver: zodResolver(orderSchema),
@@ -62,10 +66,29 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
             skuId: '',
             price: undefined as any,
             currency: 'USD',
-            platform: undefined,
+            platform: '',
             status: 'IN_PROGRESS',
+            deliveryPartner: '',
+            trackingId: '',
         },
     });
+
+    // Fetch platforms and delivery partners from settings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const settings = await settingsService.getSettings();
+                setPlatforms(Array.isArray(settings.sellingPlatforms) ? settings.sellingPlatforms : []);
+                setDeliveryPartners(Array.isArray(settings.deliveryPartners) ? settings.deliveryPartners : []);
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+                toast.error('Failed to load platforms and delivery partners');
+            } finally {
+                setLoadingSettings(false);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -77,6 +100,8 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     currency: order.currency,
                     platform: order.platform,
                     status: order.status,
+                    deliveryPartner: order.deliveryPartner || '',
+                    trackingId: order.trackingId || '',
                 });
             } else {
                 form.reset({
@@ -84,8 +109,10 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     skuId: '',
                     price: undefined as any,
                     currency: 'USD',
-                    platform: undefined,
+                    platform: '',
                     status: 'IN_PROGRESS',
+                    deliveryPartner: '',
+                    trackingId: '',
                 });
             }
         }
@@ -133,7 +160,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     <Button
                         type="submit"
                         form="order-form"
-                        disabled={form.formState.isSubmitting}
+                        disabled={form.formState.isSubmitting || loadingSettings}
                         className="bg-primary hover:bg-primary/90 text-white"
                     >
                         {form.formState.isSubmitting && (
@@ -238,23 +265,69 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-gray-700 dark:text-gray-300">Platform *</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value} disabled={loadingSettings}>
                                     <FormControl>
                                         <SelectTrigger className="bg-white dark:bg-dark-bg-tertiary">
-                                            <SelectValue placeholder="Select platform" />
+                                            <SelectValue placeholder={loadingSettings ? "Loading platforms..." : "Select platform"} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Amazon">Amazon</SelectItem>
-                                        <SelectItem value="Flipkart">Flipkart</SelectItem>
-                                        <SelectItem value="Meesho">Meesho</SelectItem>
-                                        <SelectItem value="Etsy">Etsy</SelectItem>
+                                        {platforms.length === 0 && !loadingSettings && (
+                                            <SelectItem value="none" disabled>No platforms available - Add in Settings</SelectItem>
+                                        )}
+                                        {platforms.map((platform) => (
+                                            <SelectItem key={platform} value={platform}>{platform}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+
+                    {/* Delivery Partner & Tracking ID - Always visible */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="deliveryPartner"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Delivery Partner</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || undefined}
+                                        disabled={loadingSettings}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="bg-white dark:bg-dark-bg-tertiary">
+                                                <SelectValue placeholder={loadingSettings ? "Loading..." : "Select partner (optional)"} />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {deliveryPartners.map((partner) => (
+                                                <SelectItem key={partner} value={partner}>{partner}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="trackingId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Tracking ID</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter tracking ID" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     {/* Status - Only in Edit Mode */}
                     {isEditMode && (
