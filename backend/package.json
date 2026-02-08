@@ -11,6 +11,7 @@
     "migrate": "prisma migrate deploy",
     "migrate:skip-failed": "prisma migrate resolve --applied 20260207190316_add_order_status || true",
     "start:migrate": "npm run migrate:skip-failed && prisma migrate deploy && node dist/app.js",
+    "start:dbpush": "prisma db push --accept-data-loss && node dist/app.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
