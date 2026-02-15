@@ -79,6 +79,13 @@ export const userService = {
             role?: 'ADMIN' | 'CUSTOMER';
             walletBalance?: number;
             isActive?: boolean;
+            company?: string | null;
+            email?: string | null;
+            phone?: string | null;
+            companyAddress?: string | null;
+            state?: string | null;
+            pin?: string | null;
+            gst?: string | null;
         }
     ): Promise<User> {
         const response = await fetch(`${API_URL}/users/${id}`, {

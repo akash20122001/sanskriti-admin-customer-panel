@@ -43,6 +43,14 @@ const editUserSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
     active: z.boolean(),
+    // Company fields (optional)
+    company: z.string().optional(),
+    email: z.string().email('Invalid email').optional().or(z.literal('')),
+    phone: z.string().regex(/^\d{10}$/, 'Phone must be 10 digits').optional().or(z.literal('')),
+    companyAddress: z.string().optional(),
+    state: z.string().optional(),
+    pin: z.string().regex(/^\d{6}$/, 'PIN must be 6 digits').optional().or(z.literal('')),
+    gst: z.string().regex(/^[A-Z0-9]{15}$/, 'GST must be 15 alphanumeric characters').optional().or(z.literal('')),
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -82,6 +90,13 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
             name: '',
             password: '',
             active: true,
+            company: '',
+            email: '',
+            phone: '',
+            companyAddress: '',
+            state: '',
+            pin: '',
+            gst: '',
         },
     });
 
@@ -96,6 +111,13 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     name: user.name,
                     password: '', // Don't populate password for security
                     active: user.isActive,
+                    company: user.company || '',
+                    email: user.email || '',
+                    phone: user.phone || '',
+                    companyAddress: user.companyAddress || '',
+                    state: user.state || '',
+                    pin: user.pin || '',
+                    gst: user.gst || '',
                 });
             } else {
                 createForm.reset({
@@ -148,6 +170,13 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     userId: editData.userId,
                     name: editData.name,
                     isActive: editData.active,
+                    company: editData.company || null,
+                    email: editData.email || null,
+                    phone: editData.phone || null,
+                    companyAddress: editData.companyAddress || null,
+                    state: editData.state || null,
+                    pin: editData.pin || null,
+                    gst: editData.gst || null,
                 };
 
                 if (editData.password && editData.password.trim() !== '') {
@@ -287,123 +316,122 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                         )}
                     />
 
-                    {/* Company Details - Only show in create mode */}
-                    {!isEditMode && (
-                        <div className="space-y-4 pt-4 border-t">
-                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Company Details (Optional)
-                            </h4>
+                    {/* Company Details - Show in both create and edit mode */}
+                    <div className="space-y-4 pt-4 border-t">
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Company Details (Optional)
+                        </h4>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control as any}
-                                    name="company"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300">Company Name</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="ABC Corp" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control as any}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300">Email</FormLabel>
-                                            <FormControl>
-                                                <Input type="email" placeholder="company@example.com" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control as any}
-                                    name="phone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300">Phone</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="1234567890" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control as any}
-                                    name="gst"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300">GST Number</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="29ABCDE1234F1Z5"
-                                                    {...field}
-                                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                                    className="bg-white dark:bg-dark-bg-tertiary"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
+                        <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control as any}
-                                name="companyAddress"
+                                name="company"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Company Address</FormLabel>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Company Name</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="123 Main Street, City" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                            <Input placeholder="ABC Corp" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control as any}
-                                    name="state"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300">State</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Maharashtra" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control as any}
-                                    name="pin"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300">PIN Code</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="400001" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            <FormField
+                                control={form.control as any}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Email</FormLabel>
+                                        <FormControl>
+                                            <Input type="email" placeholder="company@example.com" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
-                    )}
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control as any}
+                                name="phone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Phone</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="1234567890" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control as any}
+                                name="gst"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">GST Number</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="29ABCDE1234F1Z5"
+                                                {...field}
+                                                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                                                className="bg-white dark:bg-dark-bg-tertiary"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <FormField
+                            control={form.control as any}
+                            name="companyAddress"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700 dark:text-gray-300">Company Address</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="123 Main Street, City" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control as any}
+                                name="state"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">State</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Maharashtra" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control as any}
+                                name="pin"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">PIN Code</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="400001" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
 
                     <FormField
                         control={form.control as any}
@@ -427,6 +455,6 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     />
                 </form>
             </Form>
-        </CommonModal>
+        </CommonModal >
     );
 }

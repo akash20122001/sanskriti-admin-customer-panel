@@ -183,6 +183,15 @@ export default function UsersPage() {
                                             User
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                            Company
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                            Contact Info
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                            Location
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                             Role
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -203,6 +212,31 @@ export default function UsersPage() {
                                                 <div>
                                                     <p className="font-medium text-primary">{user.name}</p>
                                                     <p className="text-sm text-gray-500">{user.userId}</p>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{user.company || '-'}</p>
+                                                    {user.gst && <p className="text-xs text-gray-500">GST: {user.gst}</p>}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div>
+                                                    {user.email && <p className="text-sm text-gray-900">{user.email}</p>}
+                                                    {user.phone && <p className="text-xs text-gray-500">{user.phone}</p>}
+                                                    {!user.email && !user.phone && <span className="text-gray-400">-</span>}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div>
+                                                    {user.state && <p className="text-sm text-gray-900">{user.state}</p>}
+                                                    {user.companyAddress && (
+                                                        <p className="text-xs text-gray-500 truncate max-w-[150px]" title={user.companyAddress}>
+                                                            {user.companyAddress}
+                                                        </p>
+                                                    )}
+                                                    {user.pin && <p className="text-xs text-gray-500">{user.pin}</p>}
+                                                    {!user.state && !user.companyAddress && !user.pin && <span className="text-gray-400">-</span>}
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4">

@@ -16,6 +16,13 @@ export const userController = {
                     role: true,
                     walletBalance: true,
                     isActive: true,
+                    company: true,
+                    email: true,
+                    phone: true,
+                    companyAddress: true,
+                    state: true,
+                    pin: true,
+                    gst: true,
                     createdAt: true,
                     updatedAt: true,
                 },
@@ -45,6 +52,13 @@ export const userController = {
                     role: true,
                     walletBalance: true,
                     isActive: true,
+                    company: true,
+                    email: true,
+                    phone: true,
+                    companyAddress: true,
+                    state: true,
+                    pin: true,
+                    gst: true,
                     createdAt: true,
                     updatedAt: true,
                 },
@@ -130,7 +144,7 @@ export const userController = {
     async updateUser(req: Request, res: Response): Promise<any> {
         try {
             const id = req.params.id as string;
-            const { userId, name, password, role, walletBalance, isActive } = req.body;
+            const { userId, name, password, role, walletBalance, isActive, company, email, phone, companyAddress, state, pin, gst } = req.body;
 
             // Check if user exists
             const existingUser = await prisma.user.findUnique({
@@ -161,6 +175,15 @@ export const userController = {
             if (walletBalance !== undefined) updateData.walletBalance = walletBalance;
             if (isActive !== undefined) updateData.isActive = isActive;
 
+            // Allow updating optional fields
+            if (company !== undefined) updateData.company = company;
+            if (email !== undefined) updateData.email = email;
+            if (phone !== undefined) updateData.phone = phone;
+            if (companyAddress !== undefined) updateData.companyAddress = companyAddress;
+            if (state !== undefined) updateData.state = state;
+            if (pin !== undefined) updateData.pin = pin;
+            if (gst !== undefined) updateData.gst = gst;
+
             // Update user
             const user = await prisma.user.update({
                 where: { id },
@@ -172,6 +195,13 @@ export const userController = {
                     role: true,
                     walletBalance: true,
                     isActive: true,
+                    company: true,
+                    email: true,
+                    phone: true,
+                    companyAddress: true,
+                    state: true,
+                    pin: true,
+                    gst: true,
                     createdAt: true,
                     updatedAt: true,
                 },
