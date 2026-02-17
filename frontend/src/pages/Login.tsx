@@ -41,13 +41,28 @@ export default function LoginPage() {
     // Get redirect path or default to appropriate dashboard
     const from = location.state?.from?.pathname;
 
-    // Redirect if already logged in
+    // Unified redirect logic for both existing sessions and new logins
     useEffect(() => {
         if (isAuthenticated && user) {
-            const dashboardPath = user.role === 'ADMIN' ? '/admin/dashboard' : '/customer/dashboard';
-            navigate(dashboardPath, { replace: true });
+            if (from) {
+                // Prevent redirection to unauthorized routes
+                // e.g. If Admin was logged in, logged out (saving /admin as 'from'), and then Customer logs in
+                if (user.role === 'CUSTOMER' && from.startsWith('/admin')) {
+                    navigate('/customer/dashboard', { replace: true });
+                    return;
+                }
+                if (user.role === 'ADMIN' && from.startsWith('/customer')) {
+                    navigate('/admin/dashboard', { replace: true });
+                    return;
+                }
+
+                navigate(from, { replace: true });
+            } else {
+                const dashboardPath = user.role === 'ADMIN' ? '/admin/dashboard' : '/customer/dashboard';
+                navigate(dashboardPath, { replace: true });
+            }
         }
-    }, [isAuthenticated, user, navigate]);
+    }, [isAuthenticated, user, navigate, from]);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -63,18 +78,7 @@ export default function LoginPage() {
             toast.success('Login successful', {
                 description: 'Welcome back to Sanskriti!',
             });
-
-            // Determine redirect path based on role if no specific redirect exists
-            if (!from) {
-                const user = useAuthStore.getState().user;
-                if (user?.role === 'ADMIN') {
-                    navigate('/admin/dashboard');
-                } else {
-                    navigate('/customer/dashboard');
-                }
-            } else {
-                navigate(from, { replace: true });
-            }
+            // Navigation is handled by the useEffect above when isAuthenticated becomes true
         } catch (error) {
             toast.error('Login failed', {
                 description: (error as Error).message || 'Invalid credentials. Please try again.',
