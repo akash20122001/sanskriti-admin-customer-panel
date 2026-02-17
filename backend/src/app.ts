@@ -9,6 +9,7 @@ import billRoutes from './routes/bill.routes';
 import transactionRoutes from './routes/transaction.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import settingsRoutes from './routes/settings.routes';
+import paymentRoutes from './routes/payment.routes';
 import { seedDatabase } from './controllers/seed.controller';
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/payment', paymentRoutes);
 
 
 // Serve static invoices

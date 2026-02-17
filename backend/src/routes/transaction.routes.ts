@@ -7,8 +7,6 @@ const router = express.Router();
 
 // Customer routes (authenticated users)
 router.get('/', authenticateToken, transactionController.getTransactions);
-router.post('/create-test-order', authenticateToken, transactionController.createTestOrder);
-router.post('/verify-test-payment', authenticateToken, transactionController.verifyTestPayment);
 
 // Admin routes
 router.get('/all', authenticateToken, requireAdmin, transactionController.getAllTransactions);

@@ -1,225 +1,211 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Info, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Wallet, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { transactionService } from '@/services/transaction.service';
+import { authService } from '@/services/auth.service';
+import AddBalanceModal from '@/components/AddBalanceModal';
 
 export default function AddBalance() {
     const navigate = useNavigate();
-    const [amount, setAmount] = useState<string>('');
-    const [loading, setLoading] = useState(false);
-    const [testPaymentData, setTestPaymentData] = useState<{
-        transactionId: string;
-        amount: number;
-    } | null>(null);
+    const [currentBalance, setCurrentBalance] = useState<number>(0);
+    const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const handleCreateOrder = async () => {
-        const amountNum = parseFloat(amount);
+    useEffect(() => {
+        fetchUserData();
+    }, []);
 
-        if (!amount || isNaN(amountNum)) {
-            toast.error('Please enter a valid amount');
-            return;
-        }
-
-        if (amountNum < 100) {
-            toast.error('Minimum amount is ₹100');
-            return;
-        }
-
-        if (amountNum > 50000) {
-            toast.error('Maximum amount is ₹50,000');
-            return;
-        }
-
+    const fetchUserData = async () => {
         try {
             setLoading(true);
-            const response = await transactionService.createTestOrder(amountNum);
-
-            setTestPaymentData({
-                transactionId: response.transactionId,
-                amount: response.amount,
-            });
-
-            toast.success('Test payment order created! Use the buttons below to simulate payment.');
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to create order');
+            const user = await authService.getCurrentUser();
+            setCurrentBalance(user?.walletBalance || 0);
+        } catch (error) {
+            console.error('Failed to fetch user data:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleTestPayment = async (success: boolean) => {
-        if (!testPaymentData) {
-            toast.error('No active payment order');
-            return;
-        }
-
-        try {
-            setLoading(true);
-            await transactionService.verifyTestPayment(
-                testPaymentData.transactionId,
-                success
-            );
-
-            if (success) {
-                toast.success(
-                    `Transaction successful! ₹${testPaymentData.amount.toFixed(2)} added to your wallet.`,
-                    { duration: 5000 }
-                );
-                setTimeout(() => {
-                    navigate('/customer/dashboard');
-                }, 1500);
-            } else {
-                toast.error('Payment failed. Please try again.');
-                setTestPaymentData(null);
-                setAmount('');
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to process payment');
-        } finally {
-            setLoading(false);
-        }
+    const handleSuccess = () => {
+        // Refresh user data after successful payment
+        fetchUserData();
+        // Optionally navigate back to dashboard
+        // navigate('/customer/dashboard');
     };
 
-    const quickAmounts = [100, 500, 1000, 2000, 5000, 10000];
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold font-display text-primary">Add Balance</h1>
-                <p className="text-gray-600 mt-1">Add money to your wallet using test payment</p>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/customer/dashboard')}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <ArrowLeft className="w-6 h-6 text-gray-600" />
+                    </button>
+                    <div>
+                        <h1 className="text-3xl font-bold font-display text-primary">Add Balance</h1>
+                        <p className="text-gray-600 mt-1">Top up your wallet securely</p>
+                    </div>
+                </div>
             </div>
 
-            {/* Info Alert */}
-            <Card className="border-blue-200 bg-blue-50">
-                <CardContent className="pt-6">
-                    <div className="flex gap-3">
-                        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h3 className="font-semibold text-blue-900">Test Payment Mode</h3>
-                            <p className="text-sm text-blue-700 mt-1">
-                                Razorpay integration is coming soon! For now, use test buttons to simulate payments.
-                                Minimum: ₹100 | Maximum: ₹50,000
-                            </p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Main Card */}
+            {/* Current Balance Card */}
             <Card className="border-0 shadow-lg">
                 <CardHeader>
-                    <CardTitle className="font-display">Enter Amount</CardTitle>
+                    <CardTitle className="font-display flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-green-600" />
+                        Current Wallet Balance
+                    </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    {/* Amount Input */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Amount (₹)
-                        </label>
-                        <div className="relative">
-                            <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                            <Input
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                placeholder="Enter amount"
-                                className="pl-10 text-lg"
-                                disabled={testPaymentData !== null}
-                            />
-                        </div>
+                <CardContent>
+                    <div className="text-4xl font-bold text-green-600">
+                        ₹{currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
-
-                    {/* Quick Amount Buttons */}
-                    <div>
-                        <p className="text-sm text-gray-600 mb-2">Quick Select:</p>
-                        <div className="grid grid-cols-3 gap-2">
-                            {quickAmounts.map((quickAmount) => (
-                                <Button
-                                    key={quickAmount}
-                                    variant="outline"
-                                    onClick={() => setAmount(quickAmount.toString())}
-                                    disabled={testPaymentData !== null}
-                                >
-                                    ₹{quickAmount}
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Proceed Button */}
-                    {!testPaymentData && (
-                        <Button
-                            onClick={handleCreateOrder}
-                            disabled={loading || !amount}
-                            className="w-full text-white"
-                        >
-                            {loading ? 'Processing...' : 'Proceed to Payment'}
-                        </Button>
-                    )}
-
-                    {/* Test Payment Buttons */}
-                    {testPaymentData && (
-                        <div className="space-y-4 pt-4 border-t">
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-sm text-gray-600">Transaction ID:</p>
-                                <p className="font-mono text-sm font-semibold text-primary">
-                                    {testPaymentData.transactionId}
-                                </p>
-                                <p className="text-sm text-gray-600 mt-2">Amount:</p>
-                                <p className="text-2xl font-bold font-display text-primary">
-                                    ₹{testPaymentData.amount.toFixed(2)}
-                                </p>
-                            </div>
-
-                            <p className="text-center text-gray-600 font-medium">
-                                Simulate Payment Outcome:
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Button
-                                    onClick={() => handleTestPayment(true)}
-                                    disabled={loading}
-                                    className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
-                                >
-                                    <CheckCircle className="w-5 h-5" />
-                                    Success
-                                </Button>
-                                <Button
-                                    onClick={() => handleTestPayment(false)}
-                                    disabled={loading}
-                                    variant="destructive"
-                                    className="flex items-center justify-center gap-2 text-white"
-                                >
-                                    <XCircle className="w-5 h-5" />
-                                    Failure
-                                </Button>
-                            </div>
-
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setTestPaymentData(null);
-                                    setAmount('');
-                                }}
-                                disabled={loading}
-                                className="w-full"
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    )}
                 </CardContent>
             </Card>
 
-            {/* Help Text */}
-            <div className="text-center text-sm text-gray-500">
-                <p>Your wallet balance will be updated immediately after successful payment</p>
+            {/* Add Balance Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* How to Add Balance */}
+                <Card className="border-0 shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="font-display flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-blue-600" />
+                            How to Add Balance
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="flex gap-3">
+                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
+                                    1
+                                </div>
+                                <div>
+                                    <p className="font-medium text-primary">Click "Add Balance"</p>
+                                    <p className="text-sm text-gray-600">Start the payment process</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
+                                    2
+                                </div>
+                                <div>
+                                    <p className="font-medium text-primary">Enter Amount</p>
+                                    <p className="text-sm text-gray-600">Choose amount between ₹1,000 - ₹50,000</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
+                                    3
+                                </div>
+                                <div>
+                                    <p className="font-medium text-primary">Complete Payment</p>
+                                    <p className="text-sm text-gray-600">Pay securely via Razorpay</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-semibold">
+                                    ✓
+                                </div>
+                                <div>
+                                    <p className="font-medium text-primary">Balance Credited</p>
+                                    <p className="text-sm text-gray-600">Amount added instantly to your wallet</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="w-full mt-6 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+                        >
+                            Add Balance Now
+                        </button>
+                    </CardContent>
+                </Card>
+
+                {/* Important Information */}
+                <Card className="border-0 shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="font-display flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-orange-600" />
+                            Important Information
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div className="flex gap-2">
+                                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium text-green-900">Instant Credit</p>
+                                        <p className="text-sm text-green-700 mt-1">
+                                            Your wallet balance is updated immediately after successful payment
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex gap-2">
+                                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium text-blue-900">Secure Payment</p>
+                                        <p className="text-sm text-blue-700 mt-1">
+                                            All payments are processed securely through Razorpay with bank-grade encryption
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <div className="flex gap-2">
+                                    <CheckCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium text-purple-900">Payment Methods</p>
+                                        <p className="text-sm text-purple-700 mt-1">
+                                            UPI, Cards, Net Banking, and Wallets accepted
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                <div className="flex gap-2">
+                                    <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium text-orange-900">Limits</p>
+                                        <p className="text-sm text-orange-700 mt-1">
+                                            Minimum: ₹1,000 | Maximum: ₹50,000 per transaction
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
+
+            {/* Modal */}
+            {showModal && (
+                <AddBalanceModal
+                    onClose={() => setShowModal(false)}
+                    onSuccess={handleSuccess}
+                />
+            )}
         </div>
     );
 }
