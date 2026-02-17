@@ -9,7 +9,7 @@ interface AddBalanceModalProps {
     onSuccess: () => void;
 }
 
-const MIN_AMOUNT = 1000;
+const MIN_AMOUNT = 1;
 const MAX_AMOUNT = 50000;
 
 const AddBalanceModal = ({ onClose, onSuccess }: AddBalanceModalProps) => {

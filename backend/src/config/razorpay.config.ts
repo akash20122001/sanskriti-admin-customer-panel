@@ -17,6 +17,6 @@ export const RAZORPAY_CONFIG = {
     KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
     WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || '',
     CURRENCY: 'INR',
-    MIN_AMOUNT: 1000, // ₹1,000
+    MIN_AMOUNT: 1, // ₹1
     MAX_AMOUNT: 50000, // ₹50,000
 };

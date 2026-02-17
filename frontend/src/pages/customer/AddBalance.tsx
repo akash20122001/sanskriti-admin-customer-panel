@@ -105,7 +105,7 @@ export default function AddBalance() {
                                 </div>
                                 <div>
                                     <p className="font-medium text-primary">Enter Amount</p>
-                                    <p className="text-sm text-gray-600">Choose amount between ₹1,000 - ₹50,000</p>
+                                    <p className="text-sm text-gray-600">Choose amount between ₹1 - ₹50,000</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">
@@ -189,7 +189,7 @@ export default function AddBalance() {
                                     <div>
                                         <p className="font-medium text-orange-900">Limits</p>
                                         <p className="text-sm text-orange-700 mt-1">
-                                            Minimum: ₹1,000 | Maximum: ₹50,000 per transaction
+                                            Minimum: ₹1 | Maximum: ₹50,000 per transaction
                                         </p>
                                     </div>
                                 </div>
