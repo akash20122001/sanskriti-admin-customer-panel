@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Eye, Download, FileText, Calendar } from 'lucide-react';
+import { Plus, Search, Download, FileText, Calendar } from 'lucide-react';
 import BillModal from '@/components/BillModal';
 
 export default function BillsPage() {
@@ -54,10 +54,7 @@ export default function BillsPage() {
         setIsModalOpen(true);
     };
 
-    const handleViewBill = (bill: Bill) => {
-        setSelectedBill(bill);
-        setIsModalOpen(true);
-    };
+
 
     const handleDownloadInvoice = async (bill: Bill) => {
         try {
@@ -270,14 +267,7 @@ export default function BillsPage() {
                                             </td>
                                             <td className="py-3 px-4">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleViewBill(bill)}
-                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                    </Button>
+
                                                     {bill.invoiceUrl && (
                                                         <Button
                                                             variant="ghost"
