@@ -20,6 +20,7 @@ interface Bill {
     price: number;
     currency: string;
     shippingCharge: number;
+    packagingCharge: number;
     taxPercent: number;
     payableAmount: number;
     invoiceNumber?: string | null;
@@ -54,7 +55,10 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber: string | undefined, sett
     // <div>Company GSTIN/UIN: ${settings.companyGst}</div>
 
     const subtotal = bill.quantity * bill.price;
-    const taxAmount = subtotal * (bill.taxPercent / 100);
+    const shippingCharge = bill.shippingCharge || 0;
+    const packagingCharge = bill.packagingCharge || 0;
+    const baseAmount = subtotal + shippingCharge + packagingCharge;
+    const taxAmount = baseAmount * (bill.taxPercent / 100);
 
     // Process Logo
     const logoPath = path.join(__dirname, '../assets/logo.png');
@@ -199,7 +203,11 @@ function generateInvoiceHTML(bill: Bill, invoiceNumber: string | undefined, sett
                         </div>
                         <div class="breakdown-row">
                             <span>Shipping Charge:</span>
-                            <span>${currencySymbol}${bill.shippingCharge.toFixed(2)}</span>
+                            <span>${currencySymbol}${shippingCharge.toFixed(2)}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>Packaging Charge:</span>
+                            <span>${currencySymbol}${packagingCharge.toFixed(2)}</span>
                         </div>
                         <div class="breakdown-row">
                             <span>Tax (${bill.taxPercent}%):</span>
