@@ -10,13 +10,7 @@ function generateOrderId(): string {
     return `ORD-${randomStr}`;
 }
 
-// Generate unique transaction ID
-function generateTransactionId(): string {
-    const uuid = crypto.randomUUID();
-    const timestamp = Date.now().toString(36);
-    const randomPart = uuid.split('-')[0].toUpperCase();
-    return `TXN-${timestamp}-${randomPart}`;
-}
+
 
 export const orderController = {
     // Get all orders (admin only)
@@ -75,24 +69,6 @@ export const orderController = {
 
             // Platform validation removed - now accepts any string value from Settings
 
-            // CRITICAL FIX: Check if user exists
-            const user = await prisma.user.findUnique({ where: { userId } });
-            if (!user) {
-                return res.status(404).json({ error: `User with ID '${userId}' not found` });
-            }
-
-            // CRITICAL FIX: Check if user has sufficient wallet balance
-            // Wallet balance check removed as per requirement
-            /*
-            const orderPrice = parseFloat(price);
-            if (user.walletBalance < orderPrice) {
-                return res.status(400).json({
-                    error: `Insufficient wallet balance. User has ₹${user.walletBalance.toFixed(2)} but needs ₹${orderPrice.toFixed(2)}`
-                });
-            }
-            */
-            const orderPrice = parseFloat(price);
-
             // Generate unique order ID
             const orderId = generateOrderId();
 
@@ -101,33 +77,13 @@ export const orderController = {
                     orderId,
                     userId,
                     skuId,
-                    price: orderPrice,
+                    price: parseFloat(price),
                     currency,
                     platform,
                     deliveryPartner: deliveryPartner || null,
                     trackingId: trackingId || null,
                     orderDate: orderDate ? new Date(orderDate) : new Date(),
                 },
-            });
-
-            // Deduct from wallet & Create Transaction
-            const transactionId = generateTransactionId();
-
-            await prisma.transaction.create({
-                data: {
-                    transactionId,
-                    userId: user.userId,
-                    amount: orderPrice,
-                    type: 'DEBIT',
-                    status: 'SUCCESS',
-                    paymentMethod: 'WALLET',
-                    description: `Order payment for ${skuId} (Ord: ${orderId})`,
-                },
-            });
-
-            await prisma.user.update({
-                where: { userId: user.userId },
-                data: { walletBalance: user.walletBalance - orderPrice },
             });
 
             res.status(201).json({ order });
