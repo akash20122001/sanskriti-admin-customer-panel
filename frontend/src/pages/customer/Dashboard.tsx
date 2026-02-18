@@ -34,32 +34,56 @@ export default function CustomerDashboard() {
     }, []);
 
     const fetchDashboardData = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
+            // Fetch everything in parallel with error handling for each
+            const [userResult, transactionsResult, ordersResult, billsResult] = await Promise.allSettled([
+                authService.getCurrentUser(),
+                transactionService.getTransactions(),
+                orderService.getCustomerOrders(),
+                billService.getCustomerBills()
+            ]);
 
-            // Fetch fresh user data (for wallet balance)
-            const currentUser = await authService.getCurrentUser();
+            const newStats: DashboardStats = {
+                walletBalance: 0,
+                totalTransactions: 0,
+                totalOrders: 0,
+                totalBills: 0,
+            };
 
-            // Fetch transactions
-            const transactionsResponse = await transactionService.getTransactions();
+            // Process User Data
+            if (userResult.status === 'fulfilled' && userResult.value) {
+                newStats.walletBalance = userResult.value.walletBalance || 0;
+            } else {
+                console.error('Failed to fetch user data', userResult.status === 'rejected' ? userResult.reason : '');
+            }
 
-            // Fetch orders
-            const ordersResponse = await orderService.getCustomerOrders();
+            // Process Transactions
+            if (transactionsResult.status === 'fulfilled' && transactionsResult.value) {
+                newStats.totalTransactions = transactionsResult.value.transactions?.length || 0;
+                setRecentTransactions(transactionsResult.value.transactions?.slice(0, 5) || []);
+            } else {
+                console.error('Failed to fetch transactions', transactionsResult.status === 'rejected' ? transactionsResult.reason : '');
+            }
 
-            // Fetch bills
-            const billsResponse = await billService.getCustomerBills();
+            // Process Orders
+            if (ordersResult.status === 'fulfilled' && ordersResult.value) {
+                newStats.totalOrders = ordersResult.value.orders?.length || 0;
+                setRecentOrders(ordersResult.value.orders?.slice(0, 5) || []);
+            } else {
+                console.error('Failed to fetch orders', ordersResult.status === 'rejected' ? ordersResult.reason : '');
+            }
 
-            setStats({
-                walletBalance: currentUser?.walletBalance || 0,
-                totalTransactions: transactionsResponse.transactions?.length || 0,
-                totalOrders: ordersResponse.orders?.length || 0,
-                totalBills: billsResponse.bills?.length || 0,
-            });
+            // Process Bills
+            if (billsResult.status === 'fulfilled' && billsResult.value) {
+                newStats.totalBills = billsResult.value.bills?.length || 0;
+            } else {
+                console.error('Failed to fetch bills', billsResult.status === 'rejected' ? billsResult.reason : '');
+            }
 
-            setRecentTransactions(transactionsResponse.transactions?.slice(0, 5) || []);
-            setRecentOrders(ordersResponse.orders?.slice(0, 5) || []);
+            setStats(newStats);
         } catch (error) {
-            console.error('Failed to fetch dashboard data:', error);
+            console.error('Unexpected error in dashboard fetch:', error);
         } finally {
             setLoading(false);
         }

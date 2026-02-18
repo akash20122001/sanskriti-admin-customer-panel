@@ -14,11 +14,12 @@ function generateTransactionId(): string {
 }
 
 // Calculate payable amount
-function calculatePayableAmount(quantity: number, price: number, taxPercent: number, shippingCharge: number): number {
+// Calculate payable amount
+function calculatePayableAmount(quantity: number, price: number, taxPercent: number, shippingCharge: number, packagingCharge: number): number {
     const subtotal = quantity * price;
-    const subtotalWithShipping = subtotal + shippingCharge;
-    const taxAmount = subtotalWithShipping * (taxPercent / 100);
-    const total = subtotalWithShipping + taxAmount;
+    const baseAmount = subtotal + shippingCharge + packagingCharge;
+    const taxAmount = baseAmount * (taxPercent / 100);
+    const total = baseAmount + taxAmount;
     return parseFloat(total.toFixed(2));
 }
 
@@ -105,6 +106,7 @@ export const billController = {
                 price,
                 currency,
                 shippingCharge,
+                packagingCharge,
                 taxPercent,
             } = req.body;
 
@@ -118,10 +120,11 @@ export const billController = {
             if (price <= 0) return res.status(400).json({ error: 'Price must be greater than 0' });
             if (!['USD', 'INR'].includes(currency)) return res.status(400).json({ error: 'Invalid currency' });
             if (shippingCharge < 0) return res.status(400).json({ error: 'Shipping charge cannot be negative' });
+            if (packagingCharge < 0) return res.status(400).json({ error: 'Packaging charge cannot be negative' });
             if (taxPercent < 0 || taxPercent > 100) return res.status(400).json({ error: 'Tax must be between 0 and 100' });
 
             // Calculate Amount FIRST
-            const payableAmount = calculatePayableAmount(quantity, price, taxPercent || 0, shippingCharge || 0);
+            const payableAmount = calculatePayableAmount(quantity, price, taxPercent || 0, shippingCharge || 0, packagingCharge || 0);
 
             // CRITICAL FIX: Check if user exists BEFORE creating bill
             const user = await prisma.user.findUnique({ where: { userId } });
@@ -169,6 +172,7 @@ export const billController = {
                     price,
                     currency,
                     shippingCharge: shippingCharge || 0,
+                    packagingCharge: packagingCharge || 0,
                     taxPercent: taxPercent || 0,
                     payableAmount,
                     invoiceUrl: null,

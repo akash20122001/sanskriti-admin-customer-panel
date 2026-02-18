@@ -67,6 +67,7 @@ export const authService = {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        cache: 'no-store',
       });
 
       if (!response.ok) {

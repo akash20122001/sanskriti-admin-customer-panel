@@ -48,6 +48,7 @@ export interface Order {
     status: OrderStatus;
     deliveryPartner?: string; // NEW: Delivery partner name
     trackingId?: string; // NEW: Tracking ID
+    orderDate: string; // NEW: Date of the order
     createdAt: string;
     updatedAt: string;
 }
@@ -95,6 +96,7 @@ export interface Bill {
     price: number;
     currency: Currency;
     shippingCharge: number;
+    packagingCharge: number; // NEW
     taxPercent: number;
 
     // Calculated

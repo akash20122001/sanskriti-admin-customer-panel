@@ -34,7 +34,8 @@ const billSchema = z.object({
     quantity: z.number().int().positive('Quantity must be a positive number'),
     price: z.number().positive('Price must be greater than 0'),
     currency: z.enum(['USD', 'INR']),
-    shippingCharge: z.number().min(0, 'Shipping charge cannot be negative'),
+    shippingCharge: z.number().min(0, 'Shipping charge cannot be negative').optional(),
+    packagingCharge: z.number().min(0, 'Packaging charge cannot be negative').optional(),
     taxPercent: z.number().min(0).max(100, 'Tax must be between 0 and 100'),
 });
 
@@ -61,30 +62,32 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
             price: undefined as any,
             currency: 'INR',
             shippingCharge: undefined as any,
+            packagingCharge: undefined as any,
             taxPercent: undefined as any,
         },
     });
 
     // Calculate payable amount
-    const calculatePayableAmount = (quantity: number, price: number, taxPercent: number, shippingCharge: number) => {
+    const calculatePayableAmount = (quantity: number, price: number, taxPercent: number, shippingCharge: number, packagingCharge: number) => {
         const subtotal = quantity * price;
-        const subtotalWithShipping = subtotal + shippingCharge;
-        const taxAmount = subtotalWithShipping * (taxPercent / 100);
-        const total = subtotalWithShipping + taxAmount;
+        const baseAmount = subtotal + shippingCharge + packagingCharge;
+        const taxAmount = baseAmount * (taxPercent / 100);
+        const total = baseAmount + taxAmount;
         return parseFloat(total.toFixed(2));
     };
 
     // Watch form values for calculation
-    const watchedValues = form.watch(['quantity', 'price', 'taxPercent', 'shippingCharge']);
+    const watchedValues = form.watch(['quantity', 'price', 'taxPercent', 'shippingCharge', 'packagingCharge']);
 
     useEffect(() => {
-        const [quantity, price, taxPercent, shippingCharge] = watchedValues;
+        const [quantity, price, taxPercent, shippingCharge, packagingCharge] = watchedValues;
         if (quantity && price) {
             const calculated = calculatePayableAmount(
                 quantity,
                 price,
                 taxPercent || 0,
-                shippingCharge || 0
+                shippingCharge || 0,
+                packagingCharge || 0
             );
             setPayableAmount(calculated);
         }
@@ -101,6 +104,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                     price: bill.price,
                     currency: bill.currency,
                     shippingCharge: bill.shippingCharge,
+                    packagingCharge: bill.packagingCharge,
                     taxPercent: bill.taxPercent,
                 });
                 setPayableAmount(bill.payableAmount);
@@ -113,6 +117,7 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                     price: undefined as any,
                     currency: 'INR',
                     shippingCharge: undefined as any,
+                    packagingCharge: undefined as any,
                     taxPercent: undefined as any,
                 });
                 setPayableAmount(0);
@@ -350,7 +355,33 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                 name="shippingCharge"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-gray-700 dark:text-gray-300">Shipping Charge *</FormLabel>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Shipping Charge</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    field.onChange(val === '' ? undefined : parseFloat(val));
+                                                }}
+                                                className="bg-white dark:bg-dark-bg-tertiary"
+                                                disabled={isEditMode}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="packagingCharge"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-gray-700 dark:text-gray-300">Packaging Charge</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"

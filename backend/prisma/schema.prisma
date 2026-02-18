@@ -50,6 +50,7 @@ model Order {
   status          OrderStatus @default(IN_PROGRESS)
   deliveryPartner String?     // NEW: Delivery partner name
   trackingId      String?     // NEW: Tracking ID for shipment
+  orderDate       DateTime    @default(now()) // NEW: Date of the order
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -104,6 +105,7 @@ model Bill {
   price           Float
   currency        Currency
   shippingCharge  Float
+  packagingCharge Float    @default(0) // NEW: Packaging charge
   taxPercent      Float
   
   // Calculated

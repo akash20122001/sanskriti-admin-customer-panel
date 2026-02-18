@@ -12,6 +12,9 @@ interface Order {
     currency: string;
     platform: string;
     createdAt: string;
+    orderDate?: string;
+    deliveryPartner?: string;
+    trackingId?: string;
 }
 
 export default function CustomerOrders() {
@@ -102,10 +105,19 @@ export default function CustomerOrders() {
                                     Platform
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Delivery Partner
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Tracking ID
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Price
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Date
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Order Date
                                 </th>
                             </tr>
                         </thead>
@@ -136,6 +148,12 @@ export default function CustomerOrders() {
                                                 {order.platform}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                            {order.deliveryPartner || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                            {order.trackingId || '-'}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="text-sm font-semibold text-gray-900 dark:text-white">
                                                 {order.currency === 'INR' ? '₹' : '$'}
@@ -144,6 +162,9 @@ export default function CustomerOrders() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                                             {new Date(order.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                            {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : '-'}
                                         </td>
                                     </tr>
                                 ))

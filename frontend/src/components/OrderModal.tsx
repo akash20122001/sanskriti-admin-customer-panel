@@ -43,6 +43,7 @@ const orderSchema = z.object({
     status: z.enum(['IN_PROGRESS', 'SHIPPED', 'RTO']).optional(),
     deliveryPartner: z.string().optional(),
     trackingId: z.string().optional(),
+    orderDate: z.string().optional(), // Date string from input type="date"
 });
 
 type OrderFormValues = z.infer<typeof orderSchema>;
@@ -70,6 +71,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
             status: 'IN_PROGRESS',
             deliveryPartner: '',
             trackingId: '',
+            orderDate: new Date().toISOString().split('T')[0], // Default to today
         },
     });
 
@@ -102,6 +104,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     status: order.status,
                     deliveryPartner: order.deliveryPartner || '',
                     trackingId: order.trackingId || '',
+                    orderDate: order.orderDate ? new Date(order.orderDate).toISOString().split('T')[0] : '',
                 });
             } else {
                 form.reset({
@@ -113,6 +116,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                     status: 'IN_PROGRESS',
                     deliveryPartner: '',
                     trackingId: '',
+                    orderDate: new Date().toISOString().split('T')[0],
                 });
             }
         }
@@ -314,6 +318,7 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                             )}
                         />
 
+
                         <FormField
                             control={form.control}
                             name="trackingId"
@@ -328,6 +333,21 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                             )}
                         />
                     </div>
+
+                    {/* Order Date */}
+                    <FormField
+                        control={form.control}
+                        name="orderDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-gray-700 dark:text-gray-300">Order Date</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} className="bg-white dark:bg-dark-bg-tertiary" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     {/* Status - Only in Edit Mode */}
                     {isEditMode && (

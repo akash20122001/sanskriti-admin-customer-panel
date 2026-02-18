@@ -14,7 +14,12 @@ export const transactionService = {
     // Get user's transactions
     async getTransactions() {
         const response = await axios.get(`${API_URL}/transactions`, {
-            headers: getAuthHeaders(),
+            headers: {
+                ...getAuthHeaders(),
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            },
         });
         return response.data;
     },

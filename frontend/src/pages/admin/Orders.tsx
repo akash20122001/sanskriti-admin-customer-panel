@@ -236,7 +236,7 @@ export default function OrdersPage() {
                                             Tracking ID
                                         </th>
                                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                                            Created
+                                            Order Date
                                         </th>
                                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
                                             Actions
@@ -293,7 +293,9 @@ export default function OrdersPage() {
                                             </td>
                                             <td className="py-3 px-4">
                                                 <span className="text-sm text-gray-600">
-                                                    {new Date(order.createdAt).toLocaleDateString()}
+                                                    {order.orderDate
+                                                        ? new Date(order.orderDate).toLocaleDateString()
+                                                        : new Date(order.createdAt).toLocaleDateString()}
                                                 </span>
                                             </td>
                                             <td className="py-3 px-4">

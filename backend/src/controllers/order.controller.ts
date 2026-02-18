@@ -10,6 +10,14 @@ function generateOrderId(): string {
     return `ORD-${randomStr}`;
 }
 
+// Generate unique transaction ID
+function generateTransactionId(): string {
+    const uuid = crypto.randomUUID();
+    const timestamp = Date.now().toString(36);
+    const randomPart = uuid.split('-')[0].toUpperCase();
+    return `TXN-${timestamp}-${randomPart}`;
+}
+
 export const orderController = {
     // Get all orders (admin only)
     async getAllOrders(_req: Request, res: Response): Promise<any> {
@@ -50,7 +58,7 @@ export const orderController = {
     // Create new order (admin only)
     async createOrder(req: Request, res: Response): Promise<any> {
         try {
-            const { userId, skuId, price, currency, platform, deliveryPartner, trackingId } = req.body;
+            const { userId, skuId, price, currency, platform, deliveryPartner, trackingId, orderDate } = req.body;
 
             // Validation
             if (!userId || !skuId || !price || !currency || !platform) {
@@ -74,12 +82,16 @@ export const orderController = {
             }
 
             // CRITICAL FIX: Check if user has sufficient wallet balance
+            // Wallet balance check removed as per requirement
+            /*
             const orderPrice = parseFloat(price);
             if (user.walletBalance < orderPrice) {
                 return res.status(400).json({
                     error: `Insufficient wallet balance. User has ₹${user.walletBalance.toFixed(2)} but needs ₹${orderPrice.toFixed(2)}`
                 });
             }
+            */
+            const orderPrice = parseFloat(price);
 
             // Generate unique order ID
             const orderId = generateOrderId();
@@ -94,7 +106,28 @@ export const orderController = {
                     platform,
                     deliveryPartner: deliveryPartner || null,
                     trackingId: trackingId || null,
+                    orderDate: orderDate ? new Date(orderDate) : new Date(),
                 },
+            });
+
+            // Deduct from wallet & Create Transaction
+            const transactionId = generateTransactionId();
+
+            await prisma.transaction.create({
+                data: {
+                    transactionId,
+                    userId: user.userId,
+                    amount: orderPrice,
+                    type: 'DEBIT',
+                    status: 'SUCCESS',
+                    paymentMethod: 'WALLET',
+                    description: `Order payment for ${skuId} (Ord: ${orderId})`,
+                },
+            });
+
+            await prisma.user.update({
+                where: { userId: user.userId },
+                data: { walletBalance: user.walletBalance - orderPrice },
             });
 
             res.status(201).json({ order });
@@ -108,7 +141,7 @@ export const orderController = {
     async updateOrder(req: Request, res: Response): Promise<any> {
         try {
             const id = req.params.id as string;
-            const { userId, skuId, price, currency, platform, status, deliveryPartner, trackingId } = req.body;
+            const { userId, skuId, price, currency, platform, status, deliveryPartner, trackingId, orderDate } = req.body;
 
             // Check if order exists
             const existingOrder = await prisma.order.findUnique({
@@ -144,6 +177,7 @@ export const orderController = {
             if (status !== undefined) updateData.status = status;
             if (deliveryPartner !== undefined) updateData.deliveryPartner = deliveryPartner || null;
             if (trackingId !== undefined) updateData.trackingId = trackingId || null;
+            if (orderDate !== undefined) updateData.orderDate = new Date(orderDate);
 
             const order = await prisma.order.update({
                 where: { id },
