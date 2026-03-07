@@ -5,6 +5,7 @@ import com.sanskriti.backend.dto.request.UpdateOrderRequest;
 import com.sanskriti.backend.dto.response.OrderResponse;
 import com.sanskriti.backend.entity.Order;
 import com.sanskriti.backend.exception.ApiException;
+import com.sanskriti.backend.mapper.OrderMapper;
 import com.sanskriti.backend.repository.OrderRepository;
 import com.sanskriti.backend.repository.UserRepository;
 import com.sanskriti.backend.service.OrderService;
@@ -23,12 +24,13 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final OrderMapper orderMapper;
 
     @Override
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(OrderResponse::fromEntity)
+                .map(orderMapper::toResponse)
                 .toList();
     }
 
@@ -36,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderResponse> getMyOrders(String userId) {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
-                .map(OrderResponse::fromEntity)
+                .map(orderMapper::toResponse)
                 .toList();
     }
 
@@ -44,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderById(String id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ApiException("Order not found", HttpStatus.NOT_FOUND));
-        return OrderResponse.fromEntity(order);
+        return orderMapper.toResponse(order);
     }
 
     @Override
@@ -73,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderDate(request.getOrderDate())
                 .build();
 
-        return OrderResponse.fromEntity(orderRepository.save(order));
+        return orderMapper.toResponse(orderRepository.save(order));
     }
 
     @Override
@@ -100,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
         if (request.getTrackingId() != null)    order.setTrackingId(request.getTrackingId());
         if (request.getOrderDate() != null)     order.setOrderDate(request.getOrderDate());
 
-        return OrderResponse.fromEntity(orderRepository.save(order));
+        return orderMapper.toResponse(orderRepository.save(order));
     }
 
     @Override

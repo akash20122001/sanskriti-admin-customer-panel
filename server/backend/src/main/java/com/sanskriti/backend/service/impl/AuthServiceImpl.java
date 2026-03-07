@@ -7,6 +7,7 @@ import com.sanskriti.backend.dto.response.UserResponse;
 import com.sanskriti.backend.entity.User;
 import com.sanskriti.backend.enums.Role;
 import com.sanskriti.backend.exception.ApiException;
+import com.sanskriti.backend.mapper.UserMapper;
 import com.sanskriti.backend.repository.UserRepository;
 import com.sanskriti.backend.service.AuthService;
 import com.sanskriti.backend.service.JwtService;
@@ -45,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     /**
      * Login — maps to your Node.js login() function.
@@ -77,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
                 user.getId(), user.getUserId(), user.getRole().name());
 
         return AuthResponse.builder()
-                .user(UserResponse.fromEntity(user))
+                .user(userMapper.toResponse(user))
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -125,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
                 newUser.getId(), newUser.getUserId(), newUser.getRole().name());
 
         return AuthResponse.builder()
-                .user(UserResponse.fromEntity(newUser))
+                .user(userMapper.toResponse(newUser))
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -143,6 +145,6 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse me(String userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
-        return UserResponse.fromEntity(user);
+        return userMapper.toResponse(user);
     }
 }

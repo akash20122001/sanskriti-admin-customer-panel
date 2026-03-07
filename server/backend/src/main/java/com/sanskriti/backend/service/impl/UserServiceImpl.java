@@ -4,8 +4,8 @@ import com.sanskriti.backend.dto.request.CreateUserRequest;
 import com.sanskriti.backend.dto.request.UpdateUserRequest;
 import com.sanskriti.backend.dto.response.UserResponse;
 import com.sanskriti.backend.entity.User;
-
 import com.sanskriti.backend.exception.ApiException;
+import com.sanskriti.backend.mapper.UserMapper;
 import com.sanskriti.backend.repository.UserRepository;
 import com.sanskriti.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +69,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     // ─── READ OPERATIONS ───────────────────────────────────────────────────────
 
@@ -92,8 +93,8 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.findAll()
                 .stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // order by createdAt DESC
-                .map(UserResponse::fromEntity)
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .map(userMapper::toResponse)
                 .toList();
     }
 
@@ -117,7 +118,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
 
-        return UserResponse.fromEntity(user);
+        return userMapper.toResponse(user);
     }
 
     // ─── WRITE OPERATIONS ──────────────────────────────────────────────────────
@@ -172,7 +173,7 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         log.info("Created user: {}", savedUser.getUserId());
-        return UserResponse.fromEntity(savedUser);
+        return userMapper.toResponse(savedUser);
     }
 
     /**
@@ -231,7 +232,7 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.save(existingUser);
 
         log.info("Updated user: {}", updatedUser.getUserId());
-        return UserResponse.fromEntity(updatedUser);
+        return userMapper.toResponse(updatedUser);
     }
 
     /**

@@ -1,25 +1,18 @@
 package com.sanskriti.backend.dto.response;
 
-import com.sanskriti.backend.entity.User;
 import com.sanskriti.backend.enums.Role;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 /**
- * Returns user data WITHOUT the password.
- *
- * In Node.js you did:
- *   const { password: _, ...userWithoutPassword } = user;
- *
- * In Java, we create a dedicated DTO class that excludes the password field.
- * The static fromEntity() factory method converts a User entity to this DTO.
+ * Returns user data WITHOUT the password field.
+ * MapStruct (UserMapper) generates the mapping automatically from the User entity.
  */
 @Getter
-@Builder
+@Setter
 public class UserResponse {
-
     private String id;
     private String userId;
     private String name;
@@ -35,24 +28,4 @@ public class UserResponse {
     private String gst;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    public static UserResponse fromEntity(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .userId(user.getUserId())
-                .name(user.getName())
-                .role(user.getRole())
-                .walletBalance(user.getWalletBalance())
-                .isActive(user.getIsActive())
-                .company(user.getCompany())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .companyAddress(user.getCompanyAddress())
-                .state(user.getState())
-                .pin(user.getPin())
-                .gst(user.getGst())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
 }
