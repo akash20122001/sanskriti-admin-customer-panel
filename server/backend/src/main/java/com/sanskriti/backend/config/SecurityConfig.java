@@ -78,7 +78,16 @@ public class SecurityConfig {
                     "/api/auth/register",
                     "/health",
                     "/",
-                    "/api/health"
+                    "/api/health",
+                    // Swagger UI & OpenAPI Docs
+                    "/v3/api-docs",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/swagger-resources",
+                    "/swagger-resources/**",
+                    "/configuration/ui",
+                    "/configuration/security"
                 ).permitAll()
 
                 // Everything else requires authentication

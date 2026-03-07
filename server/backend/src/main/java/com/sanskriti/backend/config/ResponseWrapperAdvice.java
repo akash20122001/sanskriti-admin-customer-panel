@@ -41,7 +41,10 @@ public class ResponseWrapperAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        // Skip byte-array converters — SpringDoc serves its spec via these and
+        // returning a BaseResponse here causes a ClassCastException.
+        return !converterType.isAssignableFrom(
+                org.springframework.http.converter.ByteArrayHttpMessageConverter.class);
     }
 
     @Override
@@ -53,6 +56,15 @@ public class ResponseWrapperAdvice implements ResponseBodyAdvice<Object> {
             ServerHttpRequest request,
             ServerHttpResponse response
     ) {
+        // 🎓 Path-based exclusion for SpringDoc/Swagger endpoints.
+        // SpringDoc's own controllers are @RestController too, so annotation-based
+        // checks don't work. Checking the request URI path is the only reliable approach.
+        String path = request.getURI().getPath();
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
+            return body;
+        }
+
+        // Skip if response is already wrapped (e.g. from GlobalExceptionHandler)
         if (body instanceof BaseResponse) {
             return body;
         }
