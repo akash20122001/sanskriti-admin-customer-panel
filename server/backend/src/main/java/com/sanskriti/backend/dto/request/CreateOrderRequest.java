@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 public class CreateOrderRequest {
 
-    @NotBlank(message = "Order ID is required")
+    // Optional since the backend can auto-generate it if left blank
     private String orderId;
 
     @NotBlank(message = "User ID is required")

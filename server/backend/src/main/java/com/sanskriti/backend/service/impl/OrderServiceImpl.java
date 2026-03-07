@@ -57,13 +57,19 @@ public class OrderServiceImpl implements OrderService {
             throw new ApiException("User not found with userId: " + request.getUserId(), HttpStatus.NOT_FOUND);
         }
 
+        // Auto-generate Order ID if not provided
+        String finalOrderId = request.getOrderId();
+        if (finalOrderId == null || finalOrderId.isBlank()) {
+            finalOrderId = "ORD-" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        }
+
         // Check for duplicate orderId
-        if (orderRepository.findByOrderId(request.getOrderId()).isPresent()) {
+        if (orderRepository.findByOrderId(finalOrderId).isPresent()) {
             throw new ApiException("Order ID already exists", HttpStatus.CONFLICT);
         }
 
         Order order = Order.builder()
-                .orderId(request.getOrderId())
+                .orderId(finalOrderId)
                 .userId(request.getUserId())
                 .skuId(request.getSkuId())
                 .price(request.getPrice())
