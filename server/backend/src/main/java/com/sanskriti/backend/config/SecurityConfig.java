@@ -87,7 +87,8 @@ public class SecurityConfig {
                     "/swagger-resources",
                     "/swagger-resources/**",
                     "/configuration/ui",
-                    "/configuration/security"
+                    "/configuration/security",
+                    "/invoices/**"
                 ).permitAll()
 
                 // Everything else requires authentication

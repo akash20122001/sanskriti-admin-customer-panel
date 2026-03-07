@@ -10,15 +10,19 @@ import com.sanskriti.backend.enums.TransactionType;
 import com.sanskriti.backend.exception.ApiException;
 import com.sanskriti.backend.mapper.BillMapper;
 import com.sanskriti.backend.repository.BillRepository;
+import com.sanskriti.backend.repository.SettingsRepository;
 import com.sanskriti.backend.repository.TransactionRepository;
 import com.sanskriti.backend.repository.UserRepository;
 import com.sanskriti.backend.service.BillService;
+import com.sanskriti.backend.service.PdfService;
+import com.sanskriti.backend.entity.Settings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -29,7 +33,9 @@ public class BillServiceImpl implements BillService {
     private final BillRepository billRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final SettingsRepository settingsRepository;
     private final BillMapper billMapper;
+    private final PdfService pdfService;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Public API
@@ -73,8 +79,23 @@ public class BillServiceImpl implements BillService {
         saveDebitTransaction(user, transactionId, invoiceNumber, request.getProductName(), payableAmount);
         deductWalletBalance(user, payableAmount);
 
-        log.info("Bill created: {} | Invoice: {} | User: {} | Amount: ₹{}",
-                savedBill.getId(), invoiceNumber, user.getUserId(), payableAmount);
+        // ──────────────────────────────────────────────────────────────────
+        // SYNCHRONOUS PDF GENERATION
+        // Wait for PDF to finish so the UI immediately gets the invoiceUrl
+        // when the user is routed back to the Bills list page.
+        // ──────────────────────────────────────────────────────────────────
+        try {
+            Settings settings = settingsRepository.findFirstBy().orElse(null);
+            String invoiceUrl = pdfService.generateInvoicePdf(savedBill, settings);
+            
+            savedBill.setInvoiceUrl(invoiceUrl);
+            savedBill = billRepository.save(savedBill);
+        } catch (Throwable e) {
+            log.error("PDF generation failed for bill {}", savedBill.getId(), e);
+            // We do not throw here! The bill was created successfully, we just couldn't make the PDF.
+            // Catching 'Throwable' prevents NoClassDefFoundError (from missing POM updates mid-run) 
+            // from crashing the whole HTTP transaction.
+        }
 
         return billMapper.toResponse(savedBill);
     }
@@ -127,6 +148,7 @@ public class BillServiceImpl implements BillService {
                 .userId(user.getUserId())
                 .transactionId(transactionId)
                 .invoiceNumber(invoiceNumber)
+                .transactionDate(LocalDateTime.now())
                 // Company details always pulled from user profile, not from the request
                 .company(user.getCompany())
                 .email(user.getEmail())
