@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByUserId(String userId);
 
     long countByRole(Role role);
+
+    long countByRoleAndIsActive(Role role, Boolean isActive);
 }
