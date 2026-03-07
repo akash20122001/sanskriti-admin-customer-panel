@@ -44,7 +44,7 @@ export const createPaymentOrder = async (amount: number): Promise<CreateOrderRes
         }
     );
 
-    return response.data;
+    return response.data.data;
 };
 
 /**
@@ -63,7 +63,7 @@ export const verifyPayment = async (paymentData: VerifyPaymentRequest): Promise<
         }
     );
 
-    return response.data;
+    return response.data.data;
 };
 
 /**

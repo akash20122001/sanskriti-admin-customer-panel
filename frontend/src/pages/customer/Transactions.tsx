@@ -32,7 +32,7 @@ export default function Transactions() {
         try {
             setLoading(true);
             const response = await transactionService.getTransactions();
-            setTransactions(response.transactions || []);
+            setTransactions(response || []);
         } catch (error) {
             console.error('Failed to fetch transactions:', error);
         } finally {

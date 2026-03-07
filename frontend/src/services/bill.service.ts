@@ -22,7 +22,7 @@ export const billService = {
         }
 
         const data = await response.json();
-        return data.bills;
+        return data.data;
     },
 
     async getBillById(id: string): Promise<Bill> {
@@ -36,7 +36,7 @@ export const billService = {
         }
 
         const data = await response.json();
-        return data.bill;
+        return data.data;
     },
 
     async createBill(billData: Omit<Bill, 'id' | 'transactionId' | 'transactionDate' | 'payableAmount' | 'invoiceUrl' | 'createdAt' | 'updatedAt'>): Promise<Bill> {
@@ -52,7 +52,7 @@ export const billService = {
         }
 
         const data = await response.json();
-        return data.bill;
+        return data.data;
     },
 
     async downloadInvoice(billId: string): Promise<string> {
@@ -74,6 +74,6 @@ export const billService = {
         }
 
         const data = await response.json();
-        return data;
+        return data.data;
     },
 };

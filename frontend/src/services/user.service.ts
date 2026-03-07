@@ -23,7 +23,7 @@ export const userService = {
         }
 
         const data = await response.json();
-        return data.users;
+        return data.data;
     },
 
     async getUserById(id: string): Promise<User> {
@@ -37,7 +37,7 @@ export const userService = {
         }
 
         const data = await response.json();
-        return data.user;
+        return data.data;
     },
 
     async createUser(userData: {
@@ -67,7 +67,7 @@ export const userService = {
         }
 
         const data = await response.json();
-        return data.user;
+        return data.data;
     },
 
     async updateUser(
@@ -100,7 +100,7 @@ export const userService = {
         }
 
         const data = await response.json();
-        return data.user;
+        return data.data;
     },
 
     async deleteUser(id: string): Promise<void> {

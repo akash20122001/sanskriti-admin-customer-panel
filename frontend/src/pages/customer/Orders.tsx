@@ -35,7 +35,7 @@ export default function CustomerOrders() {
         try {
             setLoading(true);
             const response = await orderService.getCustomerOrders();
-            setOrders(response.orders || []);
+            setOrders(response || []);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
         } finally {

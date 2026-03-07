@@ -43,7 +43,7 @@ export default function AdminTransactions() {
         try {
             setLoading(true);
             const response = await transactionService.getAllTransactions();
-            setTransactions(response.transactions || []);
+            setTransactions(response || []);
         } catch (error) {
             toast.error('Failed to fetch transactions');
             console.error('Error fetching transactions:', error);
@@ -60,8 +60,7 @@ export default function AdminTransactions() {
             filtered = filtered.filter(
                 (t) =>
                     t.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    t.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    t.user.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    t.userId.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -173,8 +172,7 @@ export default function AdminTransactions() {
                                             </td>
                                             <td className="py-4">
                                                 <div>
-                                                    <div className="font-medium">{transaction.user.name}</div>
-                                                    <div className="text-xs text-gray-500">{transaction.userId}</div>
+                                                    <div className="font-medium">{transaction.userId}</div>
                                                 </div>
                                             </td>
                                             <td className="py-4">

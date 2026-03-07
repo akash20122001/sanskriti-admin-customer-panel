@@ -25,7 +25,8 @@ export const settingsService = {
         if (!response.ok) {
             throw new Error('Failed to fetch settings');
         }
-        return response.json();
+        const result = await response.json();
+        return result.data;
     },
 
     async updateSettings(data: {
@@ -42,6 +43,7 @@ export const settingsService = {
         if (!response.ok) {
             throw new Error('Failed to update settings');
         }
-        return response.json();
+        const result = await response.json();
+        return result.data;
     },
 };

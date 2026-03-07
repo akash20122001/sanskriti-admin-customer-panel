@@ -35,6 +35,7 @@ export const dashboardService = {
             throw new Error(error.error || 'Failed to fetch dashboard stats');
         }
 
-        return response.json();
+        const data = await response.json();
+        return data.data;
     },
 };

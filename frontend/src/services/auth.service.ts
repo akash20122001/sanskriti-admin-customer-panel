@@ -21,7 +21,8 @@ export const authService = {
         throw new Error(error.error || 'Login failed');
       }
 
-      const data: AuthResponse = await response.json();
+      const result = await response.json();
+      const data: AuthResponse = result.data; // Spring wrap
       this.setSession(data);
       return data;
     } catch (error) {
@@ -47,7 +48,8 @@ export const authService = {
         throw new Error(error.error || 'Registration failed');
       }
 
-      const data: AuthResponse = await response.json();
+      const result = await response.json();
+      const data: AuthResponse = result.data; // Spring wrap
       this.setSession(data);
       return data;
     } catch (error) {
@@ -75,8 +77,9 @@ export const authService = {
         return null;
       }
 
-      const data = await response.json();
-      return data.user;
+      const result = await response.json();
+      // Spring Boot directly returns the UserResponse object in .data
+      return result.data;
     } catch (error) {
       console.error('Failed to get current user:', error);
       this.logout();

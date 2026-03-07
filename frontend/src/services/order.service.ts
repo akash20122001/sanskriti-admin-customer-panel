@@ -23,7 +23,7 @@ export const orderService = {
         }
 
         const data = await response.json();
-        return data.orders;
+        return data.data;
     },
 
     async getOrderById(id: string): Promise<Order> {
@@ -37,7 +37,7 @@ export const orderService = {
         }
 
         const data = await response.json();
-        return data.order;
+        return data.data;
     },
 
     async createOrder(orderData: {
@@ -59,7 +59,7 @@ export const orderService = {
         }
 
         const data = await response.json();
-        return data.order;
+        return data.data;
     },
 
     async updateOrder(
@@ -84,7 +84,7 @@ export const orderService = {
         }
 
         const data = await response.json();
-        return data.order;
+        return data.data;
     },
 
     async getCustomerOrders(): Promise<any> {
@@ -98,6 +98,6 @@ export const orderService = {
         }
 
         const data = await response.json();
-        return data;
+        return data.data;
     },
 };

@@ -38,7 +38,7 @@ export default function CustomerBills() {
         try {
             setLoading(true);
             const response = await billService.getCustomerBills();
-            setBills(response.bills || []);
+            setBills(response || []);
         } catch (error) {
             console.error('Failed to fetch bills:', error);
         } finally {

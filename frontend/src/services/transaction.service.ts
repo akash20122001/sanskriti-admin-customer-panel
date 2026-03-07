@@ -21,7 +21,7 @@ export const transactionService = {
                 'Expires': '0',
             },
         });
-        return response.data;
+        return response.data.data;
     },
 
     // Get all transactions (admin only)
@@ -29,7 +29,7 @@ export const transactionService = {
         const response = await axios.get(`${API_URL}/transactions/all`, {
             headers: getAuthHeaders(),
         });
-        return response.data;
+        return response.data.data;
     },
 
     // Create test payment order
@@ -39,7 +39,7 @@ export const transactionService = {
             { amount },
             { headers: getAuthHeaders() }
         );
-        return response.data;
+        return response.data.data;
     },
 
     // Verify test payment
@@ -49,7 +49,7 @@ export const transactionService = {
             { transactionId, success },
             { headers: getAuthHeaders() }
         );
-        return response.data;
+        return response.data.data;
     },
 
     // Admin: Credit user wallet
@@ -59,6 +59,6 @@ export const transactionService = {
             { userId, amount, description },
             { headers: getAuthHeaders() }
         );
-        return response.data;
+        return response.data.data;
     },
 };
