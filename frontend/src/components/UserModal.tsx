@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+
 import type { User } from '@/types';
 import { CommonModal } from '@/components/ui/commonModal';
-import { DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { ModalFooter } from '@/components/shared/ModalFooter';
+
 import { Input } from '@/components/ui/input';
 import {
     Form,
@@ -226,28 +226,14 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
             }
             maxWidth="sm"
             footer={
-                <DialogFooter className="gap-2">
-                    <Button type="button" variant="outline" onClick={() => onClose()} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        disabled={form.formState.isSubmitting || validatingUserId}
-                        form="user-form"
-                        className="bg-primary hover:bg-primary-light text-white"
-                    >
-                        {(form.formState.isSubmitting || validatingUserId) && (
-                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        )}
-                        {form.formState.isSubmitting
-                            ? isEditMode
-                                ? 'Updating...'
-                                : 'Creating...'
-                            : isEditMode
-                                ? 'Update User'
-                                : 'Create User'}
-                    </Button>
-                </DialogFooter>
+                <ModalFooter
+                    formId="user-form"
+                    isEditMode={!!isEditMode}
+                    isSubmitting={form.formState.isSubmitting || validatingUserId}
+                    onCancel={() => onClose()}
+                    createLabel="Create User"
+                    updateLabel="Update User"
+                />
             }
         >
             <Form {...(form as any)}>

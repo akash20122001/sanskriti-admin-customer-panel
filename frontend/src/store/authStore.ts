@@ -50,8 +50,20 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
 
       checkAuth: async () => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
+        try {
+          const token = localStorage.getItem('accessToken');
+          if (!token) {
+            set({ user: null, isAuthenticated: false });
+            return;
+          }
+
+          const user = await authService.getCurrentUser();
+          if (user) {
+            set({ user, isAuthenticated: true });
+          } else {
+            set({ user: null, isAuthenticated: false });
+          }
+        } catch (error) {
           set({ user: null, isAuthenticated: false });
         }
       },

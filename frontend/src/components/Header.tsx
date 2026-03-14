@@ -19,7 +19,7 @@ export default function Header() {
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 text-sm flex-wrap" aria-label="Breadcrumb">
                     <Link
-                        to="/admin"
+                        to={location.pathname.startsWith('/customer') ? '/customer/dashboard' : '/admin'}
                         className="text-gray-600 hover:text-primary transition-colors font-medium"
                     >
                         Home

@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import type { Bill } from '@/types';
 import { CommonModal } from '@/components/ui/commonModal';
+import { ModalFooter } from '@/components/shared/ModalFooter';
+import { NumberInput } from '@/components/shared/NumberInput';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -152,27 +154,13 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
             maxWidth="lg"
             footer={
                 !isEditMode ? (
-                    <DialogFooter>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleClose}
-                            className="bg-white dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            form="bill-form"
-                            disabled={form.formState.isSubmitting}
-                            className="bg-primary hover:bg-primary/90 text-white"
-                        >
-                            {form.formState.isSubmitting && (
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            )}
-                            {form.formState.isSubmitting ? 'Creating...' : 'Create Bill & Generate Invoice'}
-                        </Button>
-                    </DialogFooter>
+                    <ModalFooter
+                        formId="bill-form"
+                        isEditMode={false}
+                        isSubmitting={form.formState.isSubmitting}
+                        onCancel={handleClose}
+                        createLabel="Create Bill & Generate Invoice"
+                    />
                 ) : bill?.invoiceUrl ? (
                     <DialogFooter>
                         <Button
@@ -281,17 +269,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     <FormItem>
                                         <FormLabel className="text-gray-700 dark:text-gray-300">Quantity *</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="number"
-                                                min="1"
+                                            <NumberInput
+                                                field={field}
+                                                min={1}
                                                 placeholder="1"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    field.onChange(val === '' ? undefined : parseInt(val));
-                                                }}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
                                         </FormControl>
@@ -307,17 +288,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     <FormItem>
                                         <FormLabel className="text-gray-700 dark:text-gray-300">Price *</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
+                                            <NumberInput
+                                                field={field}
+                                                step={0.01}
                                                 placeholder="99.99"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    field.onChange(val === '' ? undefined : parseFloat(val));
-                                                }}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
                                         </FormControl>
@@ -357,17 +331,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     <FormItem>
                                         <FormLabel className="text-gray-700 dark:text-gray-300">Shipping Charge</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
+                                            <NumberInput
+                                                field={field}
+                                                step={0.01}
                                                 placeholder="0.00"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    field.onChange(val === '' ? undefined : parseFloat(val));
-                                                }}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
                                         </FormControl>
@@ -383,17 +350,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     <FormItem>
                                         <FormLabel className="text-gray-700 dark:text-gray-300">Packaging Charge</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
+                                            <NumberInput
+                                                field={field}
+                                                step={0.01}
                                                 placeholder="0.00"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    field.onChange(val === '' ? undefined : parseFloat(val));
-                                                }}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
                                         </FormControl>
@@ -409,17 +369,10 @@ export default function BillModal({ isOpen, onClose, bill }: BillModalProps) {
                                     <FormItem>
                                         <FormLabel className="text-gray-700 dark:text-gray-300">Tax % *</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
+                                            <NumberInput
+                                                field={field}
+                                                step={0.01}
                                                 placeholder="18.00"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    field.onChange(val === '' ? undefined : parseFloat(val));
-                                                }}
-                                                className="bg-white dark:bg-dark-bg-tertiary"
                                                 disabled={isEditMode}
                                             />
                                         </FormControl>

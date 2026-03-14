@@ -5,11 +5,10 @@ import { z } from 'zod';
 import { orderService } from '@/services/order.service';
 import { settingsService } from '@/services/settings.service';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
 import type { Order } from '@/types';
 import { CommonModal } from '@/components/ui/commonModal';
-import { DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { ModalFooter } from '@/components/shared/ModalFooter';
+import { NumberInput } from '@/components/shared/NumberInput';
 import { Input } from '@/components/ui/input';
 import {
     Form,
@@ -159,30 +158,14 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
             description={isEditMode ? 'Update order details.' : 'Create a new order with the details below.'}
             maxWidth="md"
             footer={
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleClose}
-                        className="bg-white dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300"
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        form="order-form"
-                        disabled={form.formState.isSubmitting || loadingSettings}
-                        className="bg-primary hover:bg-primary/90 text-white"
-                    >
-                        {form.formState.isSubmitting && (
-                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        )}
-                        {form.formState.isSubmitting
-                            ? (isEditMode ? 'Updating...' : 'Creating...')
-                            : (isEditMode ? 'Update Order' : 'Create Order')
-                        }
-                    </Button>
-                </DialogFooter>
+                <ModalFooter
+                    formId="order-form"
+                    isEditMode={!!isEditMode}
+                    isSubmitting={form.formState.isSubmitting || loadingSettings}
+                    onCancel={handleClose}
+                    createLabel="Create Order"
+                    updateLabel="Update Order"
+                />
             }
         >
             <Form {...form}>
@@ -228,17 +211,10 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
                                 <FormItem>
                                     <FormLabel className="text-gray-700 dark:text-gray-300">Order Price *</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
+                                        <NumberInput
+                                            field={field}
+                                            step={0.01}
                                             placeholder="99.99"
-                                            {...field}
-                                            value={field.value ?? ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                field.onChange(val === '' ? undefined : parseFloat(val));
-                                            }}
-                                            className="bg-white dark:bg-dark-bg-tertiary"
                                         />
                                     </FormControl>
                                     <FormMessage />
