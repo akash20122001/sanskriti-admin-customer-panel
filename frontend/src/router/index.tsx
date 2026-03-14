@@ -17,11 +17,11 @@ import TransactionsPage from '@/pages/admin/transactions/TransactionsPage';
 import SettingsPage from '@/pages/admin/settings/SettingsPage';
 
 // Customer Pages
-import CustomerDashboard from '@/pages/customer/Dashboard';
+import CustomerDashboard from '@/pages/customer/dashboard/DashboardPage';
 import AddBalance from '@/pages/customer/AddBalance';
-import Transactions from '@/pages/customer/Transactions';
-import CustomerOrders from '@/pages/customer/Orders';
-import CustomerBills from '@/pages/customer/Bills';
+import CustomerTransactions from '@/pages/customer/transactions/TransactionsPage';
+import CustomerOrders from '@/pages/customer/orders/OrdersPage';
+import CustomerBills from '@/pages/customer/bills/BillsPage';
 import Profile from '@/pages/customer/Profile';
 
 const router = createBrowserRouter([
@@ -61,7 +61,7 @@ const router = createBrowserRouter([
                     { index: true, element: <Navigate to="/customer/dashboard" replace /> },
                     { path: 'dashboard', element: <CustomerDashboard /> },
                     { path: 'add-balance', element: <AddBalance /> },
-                    { path: 'transactions', element: <Transactions /> },
+                    { path: 'transactions', element: <CustomerTransactions /> },
                     { path: 'orders', element: <CustomerOrders /> },
                     { path: 'bills', element: <CustomerBills /> },
                     { path: 'profile', element: <Profile /> },
