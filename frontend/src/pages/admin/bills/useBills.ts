@@ -10,9 +10,10 @@ export function useBills() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
 
-    const { data: bills = [], isLoading } = useQuery({
+    const { data: bills = [], isLoading, error } = useQuery({
         queryKey: ['bills'],
         queryFn: billService.getAllBills,
+        throwOnError: true,
     });
 
     const filteredBills = useMemo(() => {
@@ -62,7 +63,7 @@ export function useBills() {
         selectedBill, setSelectedBill,
 
         // Data & Loading
-        bills, filteredBills, isLoading,
+        bills, filteredBills, isLoading, error,
         todayBillsCount, monthBillsCount,
 
         // Actions

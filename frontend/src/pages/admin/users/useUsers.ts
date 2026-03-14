@@ -12,9 +12,10 @@ export function useUsers() {
     const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const { data: allUsers = [], isLoading } = useQuery({
+    const { data: allUsers = [], isLoading, error } = useQuery({
         queryKey: ['users'],
         queryFn: userService.getAllUsers,
+        throwOnError: true,
     });
 
     const activeUsersCount = useMemo(() => allUsers.filter((u) => u.isActive && u.role !== 'ADMIN').length, [allUsers]);
@@ -39,8 +40,8 @@ export function useUsers() {
             await userService.deleteUser(deleteTarget.id);
             toast.success('User deleted successfully');
             queryClient.invalidateQueries({ queryKey: ['users'] });
-        } catch (error) {
-            toast.error('Failed to delete user', { description: (error as Error).message });
+        } catch (err) {
+            toast.error('Failed to delete user', { description: (err as Error).message });
         } finally {
             setIsDeleting(false);
             setDeleteTarget(null);
@@ -59,10 +60,10 @@ export function useUsers() {
         isModalOpen, setIsModalOpen,
         selectedUser, setSelectedUser,
         deleteTarget, setDeleteTarget,
-        isDeleting,
+        isDeleting, setIsDeleting,
 
         // Data & Loading
-        users, filteredUsers, isLoading,
+        users, filteredUsers, isLoading, error,
         activeUsersCount, inactiveUsersCount,
 
         // Actions

@@ -14,7 +14,7 @@ import UsersPage from '@/pages/admin/users/UsersPage';
 import OrdersPage from '@/pages/admin/orders/OrdersPage';
 import BillsPage from '@/pages/admin/bills/BillsPage';
 import TransactionsPage from '@/pages/admin/transactions/TransactionsPage';
-import AdminSettings from '@/pages/admin/Settings';
+import SettingsPage from '@/pages/admin/settings/SettingsPage';
 
 // Customer Pages
 import CustomerDashboard from '@/pages/customer/Dashboard';
@@ -44,7 +44,7 @@ const router = createBrowserRouter([
                     { path: 'orders', element: <OrdersPage /> },
                     { path: 'bills', element: <BillsPage /> },
                     { path: 'transactions', element: <TransactionsPage /> },
-                    { path: 'settings', element: <AdminSettings /> },
+                    { path: 'settings', element: <SettingsPage /> },
                 ],
             },
         ],

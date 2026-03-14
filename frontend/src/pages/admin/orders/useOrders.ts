@@ -9,9 +9,10 @@ export function useOrders() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-    const { data: orders = [], isLoading } = useQuery({
+    const { data: orders = [], isLoading, error } = useQuery({
         queryKey: ['orders'],
         queryFn: orderService.getAllOrders,
+        throwOnError: true,
     });
 
     const filteredOrders = useMemo(() => {
@@ -60,6 +61,7 @@ export function useOrders() {
         orders,
         filteredOrders,
         isLoading,
+        error,
         todayOrdersCount,
         topPlatform,
 
