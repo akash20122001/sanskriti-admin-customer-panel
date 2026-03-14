@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import apiClient from '@/lib/axios';
 
 export interface CreateOrderResponse {
     orderId: string;
@@ -32,38 +30,16 @@ export interface VerifyPaymentResponse {
  * Create Razorpay order for wallet top-up
  */
 export const createPaymentOrder = async (amount: number): Promise<CreateOrderResponse> => {
-    const token = localStorage.getItem('accessToken');
-
-    const response = await axios.post(
-        `${API_URL}/payment/create-order`,
-        { amount },
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
-
-    return response.data.data;
+    const { data } = await apiClient.post('/payment/create-order', { amount });
+    return data.data;
 };
 
 /**
  * Verify payment after user completes payment
  */
 export const verifyPayment = async (paymentData: VerifyPaymentRequest): Promise<VerifyPaymentResponse> => {
-    const token = localStorage.getItem('accessToken');
-
-    const response = await axios.post(
-        `${API_URL}/payment/verify`,
-        paymentData,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
-
-    return response.data.data;
+    const { data } = await apiClient.post('/payment/verify', paymentData);
+    return data.data;
 };
 
 /**

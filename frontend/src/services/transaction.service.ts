@@ -1,64 +1,39 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
+import apiClient from '@/lib/axios';
 
 export const transactionService = {
     // Get user's transactions
     async getTransactions() {
-        const response = await axios.get(`${API_URL}/transactions`, {
+        const { data } = await apiClient.get('/transactions', {
             headers: {
-                ...getAuthHeaders(),
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
                 'Expires': '0',
             },
         });
-        return response.data.data;
+        return data.data;
     },
 
     // Get all transactions (admin only)
     async getAllTransactions() {
-        const response = await axios.get(`${API_URL}/transactions/all`, {
-            headers: getAuthHeaders(),
-        });
-        return response.data.data;
+        const { data } = await apiClient.get('/transactions/all');
+        return data.data;
     },
 
     // Create test payment order
     async createTestOrder(amount: number) {
-        const response = await axios.post(
-            `${API_URL}/transactions/create-test-order`,
-            { amount },
-            { headers: getAuthHeaders() }
-        );
-        return response.data.data;
+        const { data } = await apiClient.post('/transactions/create-test-order', { amount });
+        return data.data;
     },
 
     // Verify test payment
     async verifyTestPayment(transactionId: string, success: boolean) {
-        const response = await axios.post(
-            `${API_URL}/transactions/verify-test-payment`,
-            { transactionId, success },
-            { headers: getAuthHeaders() }
-        );
-        return response.data.data;
+        const { data } = await apiClient.post('/transactions/verify-test-payment', { transactionId, success });
+        return data.data;
     },
 
     // Admin: Credit user wallet
     async adminCredit(userId: string, amount: number, description?: string) {
-        const response = await axios.post(
-            `${API_URL}/transactions/admin-credit`,
-            { userId, amount, description },
-            { headers: getAuthHeaders() }
-        );
-        return response.data.data;
+        const { data } = await apiClient.post('/transactions/admin-credit', { userId, amount, description });
+        return data.data;
     },
 };

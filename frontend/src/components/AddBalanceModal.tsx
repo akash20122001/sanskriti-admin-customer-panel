@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { X, Wallet, AlertCircle, CheckCircle } from 'lucide-react';
+import { Wallet, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { CommonModal } from './ui/commonModal';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { createPaymentOrder, verifyPayment, openRazorpayCheckout } from '../services/payment.service';
-import '../styles/Modal.css';
 
 interface AddBalanceModalProps {
     onClose: () => void;
@@ -12,14 +15,13 @@ interface AddBalanceModalProps {
 const MIN_AMOUNT = 1;
 const MAX_AMOUNT = 50000;
 
-const AddBalanceModal = ({ onClose, onSuccess }: AddBalanceModalProps) => {
+export default function AddBalanceModal({ onClose, onSuccess }: AddBalanceModalProps) {
     const [amount, setAmount] = useState<string>('2000');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        // Only allow numbers
         if (value === '' || /^\d+$/.test(value)) {
             setAmount(value);
             setError('');
@@ -28,44 +30,34 @@ const AddBalanceModal = ({ onClose, onSuccess }: AddBalanceModalProps) => {
 
     const validateAmount = (): boolean => {
         const numAmount = parseInt(amount);
-
         if (!amount || numAmount <= 0) {
             setError('Please enter a valid amount');
             return false;
         }
-
         if (numAmount < MIN_AMOUNT) {
             setError(`Minimum amount is ₹${MIN_AMOUNT}`);
             return false;
         }
-
         if (numAmount > MAX_AMOUNT) {
             setError(`Maximum amount is ₹${MAX_AMOUNT.toLocaleString('en-IN')}`);
             return false;
         }
-
         return true;
     };
 
     const handlePayment = async () => {
         if (!validateAmount()) return;
-
         setLoading(true);
         setError('');
 
         try {
             const numAmount = parseInt(amount);
-
-            // Step 1: Create order on backend
             const orderData = await createPaymentOrder(numAmount);
 
-            // Step 2: Open Razorpay checkout
             openRazorpayCheckout(
                 orderData,
-                // Success handler
                 async (response) => {
                     try {
-                        // Step 3: Verify payment on backend
                         const verifyData = {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
@@ -74,115 +66,93 @@ const AddBalanceModal = ({ onClose, onSuccess }: AddBalanceModalProps) => {
                         };
 
                         const result = await verifyPayment(verifyData);
-
-                        // Show success message
                         toast.success('Payment Successful', {
                             description: `${result.message}. New Balance: ₹${result.newBalance.toLocaleString('en-IN')}`,
                         });
-
                         setLoading(false);
-                        onSuccess(); // Refresh parent component
+                        onSuccess();
                         onClose();
                     } catch (verifyError: any) {
                         setLoading(false);
-                        setError(verifyError.response?.data?.error || 'Payment verification failed');
+                        setError(verifyError.response?.data?.error || verifyError.message || 'Payment verification failed');
                     }
                 },
-                // Failure handler
-                (error) => {
+                (err) => {
                     setLoading(false);
-                    setError(error.error || 'Payment failed. Please try again.');
+                    setError(err.error || 'Payment failed. Please try again.');
                 }
             );
         } catch (err: any) {
             setLoading(false);
-            setError(err.response?.data?.error || 'Failed to create payment order');
+            setError(err.response?.data?.error || err.message || 'Failed to create payment order');
         }
     };
 
     const quickAmounts = [1000, 2000, 5000, 10000];
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <div className="modal-title-container">
-                        <Wallet className="modal-icon" />
-                        <h2>Add Balance</h2>
-                    </div>
-                    <button className="modal-close-btn" onClick={onClose}>
-                        <X size={20} />
-                    </button>
-                </div>
-
-                <div className="modal-body">
-                    {/* Amount Input */}
-                    <div className="form-group">
-                        <label>Amount (₹)</label>
-                        <input
-                            type="text"
-                            placeholder={`Enter amount (Min: ${MIN_AMOUNT}, Max: ${MAX_AMOUNT.toLocaleString('en-IN')})`}
-                            value={amount}
-                            onChange={handleAmountChange}
-                            disabled={loading}
-                            className="form-input"
-                            autoFocus
-                        />
-                    </div>
-
-                    {/* Quick Amount Buttons */}
-                    <div className="quick-amounts">
-                        <p className="quick-amounts-label">Quick amounts:</p>
-                        <div className="quick-amounts-grid">
-                            {quickAmounts.map((quickAmount) => (
-                                <button
-                                    key={quickAmount}
-                                    type="button"
-                                    className={`quick-amount-btn ${amount === quickAmount.toString() ? 'active' : ''}`}
-                                    onClick={() => {
-                                        setAmount(quickAmount.toString());
-                                        setError('');
-                                    }}
-                                    disabled={loading}
-                                >
-                                    ₹{quickAmount.toLocaleString('en-IN')}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Error Message */}
-                    {error && (
-                        <div className="alert alert-error">
-                            <AlertCircle size={18} />
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    {/* Info Box */}
-                    <div className="alert alert-info">
-                        <CheckCircle size={18} />
-                        <span>
-                            Secure payment powered by Razorpay. Amount will be instantly credited to your wallet.
-                        </span>
-                    </div>
-                </div>
-
-                <div className="modal-footer">
-                    <button className="btn btn-secondary" onClick={onClose} disabled={loading}>
+        <CommonModal
+            isOpen={true}
+            onClose={onClose}
+            title="Add Balance"
+            maxWidth="md"
+            footer={
+                <div className="flex justify-end gap-3 w-full">
+                    <Button variant="outline" onClick={onClose} disabled={loading}>
                         Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handlePayment}
-                        disabled={loading || !amount}
-                    >
+                    </Button>
+                    <Button onClick={handlePayment} disabled={loading || !amount} className="text-white">
                         {loading ? 'Processing...' : `Pay ₹${amount ? parseInt(amount).toLocaleString('en-IN') : '0'}`}
-                    </button>
+                    </Button>
+                </div>
+            }
+        >
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <Label>Amount (₹)</Label>
+                    <Input
+                        type="text"
+                        placeholder={`Min: ₹${MIN_AMOUNT}, Max: ₹${MAX_AMOUNT.toLocaleString('en-IN')}`}
+                        value={amount}
+                        onChange={handleAmountChange}
+                        disabled={loading}
+                        autoFocus
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-gray-500">Quick amounts:</Label>
+                    <div className="grid grid-cols-4 gap-2">
+                        {quickAmounts.map((q) => (
+                            <Button
+                                key={q}
+                                type="button"
+                                variant={amount === q.toString() ? 'default' : 'outline'}
+                                className={amount === q.toString() ? 'text-white' : ''}
+                                onClick={() => {
+                                    setAmount(q.toString());
+                                    setError('');
+                                }}
+                                disabled={loading}
+                            >
+                                ₹{q.toLocaleString('en-IN')}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 rounded-lg">
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        <p>{error}</p>
+                    </div>
+                )}
+
+                <div className="flex items-start gap-2 p-3 text-sm text-blue-700 bg-blue-50 rounded-lg">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <p>Secure payment powered by Razorpay. Amount will be instantly credited to your wallet.</p>
                 </div>
             </div>
-        </div>
+        </CommonModal>
     );
-};
-
-export default AddBalanceModal;
+}

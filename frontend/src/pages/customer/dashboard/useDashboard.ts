@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { transactionService } from '@/services/transaction.service';
 import { orderService } from '@/services/order.service';
@@ -38,19 +37,20 @@ export function useDashboard() {
             }
 
             if (transactionsResult.status === 'fulfilled' && transactionsResult.value) {
-                const txns = transactionsResult.value.transactions || [];
+                const txns = Array.isArray(transactionsResult.value) ? transactionsResult.value : (transactionsResult.value as any).transactions || [];
                 stats.totalTransactions = txns.length;
                 recentTransactions = txns.slice(0, 5);
             }
 
             if (ordersResult.status === 'fulfilled' && ordersResult.value) {
-                const ords = ordersResult.value.orders || [];
+                const ords = Array.isArray(ordersResult.value) ? ordersResult.value : (ordersResult.value as any).orders || [];
                 stats.totalOrders = ords.length;
                 recentOrders = ords.slice(0, 5);
             }
 
             if (billsResult.status === 'fulfilled' && billsResult.value) {
-                stats.totalBills = billsResult.value.bills?.length || 0;
+                const bils = Array.isArray(billsResult.value) ? billsResult.value : (billsResult.value as any).bills || [];
+                stats.totalBills = bils.length;
             }
 
             return { stats, recentTransactions, recentOrders };

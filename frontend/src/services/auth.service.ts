@@ -1,63 +1,35 @@
 import type { LoginCredentials, AuthResponse, User } from '@/types';
 import apiClient from '@/lib/axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: credentials.userId.trim(),
-          password: credentials.password,
-        }),
+      const response = await apiClient.post('/auth/login', {
+        userId: credentials.userId.trim(),
+        password: credentials.password,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Login failed');
-      }
-
-      const result = await response.json();
-      const data: AuthResponse = result.data; // Spring wrap
+      const data: AuthResponse = response.data.data;
       this.setSession(data);
       return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
       }
-      throw new Error('Failed to connect to server');
+      throw new Error('Login failed');
     }
   },
 
   async register(userData: { userId: string; name: string; password: string; role?: 'ADMIN' | 'CUSTOMER' }): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Registration failed');
-      }
-
-      const result = await response.json();
-      const data: AuthResponse = result.data; // Spring wrap
+      const response = await apiClient.post('/auth/register', userData);
+      const data: AuthResponse = response.data.data;
       this.setSession(data);
       return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
       }
-      throw new Error('Failed to connect to server');
+      throw new Error('Registration failed');
     }
   },
 
