@@ -1,43 +1,31 @@
-import { useEffect, useState } from 'react';
 import { Users, CreditCard, Activity, TrendingUp, Plus, FileText, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { dashboardService } from '@/services/dashboard.service';
-import type { AdminStats } from '@/services/dashboard.service'; // Fixed type import
 import UserModal from '@/components/UserModal';
 import OrderModal from '@/components/OrderModal';
 import BillModal from '@/components/BillModal';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { useDashboard } from './useDashboard';
 
-export default function AdminDashboard() {
-    const [stats, setStats] = useState<AdminStats | null>(null);
-    const [loading, setLoading] = useState(true);
+export default function DashboardPage() {
+    const {
+        stats, isLoading,
+        isUserModalOpen, setIsUserModalOpen,
+        isOrderModalOpen, setIsOrderModalOpen,
+        isBillModalOpen, setIsBillModalOpen,
+        refreshDashboard
+    } = useDashboard();
 
-    // Modal states
-    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-    const [isBillModalOpen, setIsBillModalOpen] = useState(false);
-
-    useEffect(() => {
-        fetchStats();
-    }, []);
-
-    const fetchStats = async () => {
-        try {
-            setLoading(true);
-            const data = await dashboardService.getAdminStats();
-            setStats(data);
-        } catch (error) {
-            console.error('Failed to fetch admin stats:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (isLoading) {
+        return <LoadingSpinner message="Loading dashboard..." fullHeight />;
+    }
 
     const statCards = [
         {
             title: 'Total Users',
             value: stats?.stats.totalUsers.toString() || '0',
             icon: Users,
-            trend: '+0%', // You can calculate this if you have historical data
+            trend: '+0%',
             color: 'bg-blue-500',
         },
         {
@@ -63,26 +51,13 @@ export default function AdminDashboard() {
         },
     ];
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading dashboard...</p>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6">
-            {/* Page Header */}
-            <div>
-                <h1 className="text-3xl font-bold font-display text-primary">Dashboard</h1>
-                <p className="text-gray-600 mt-1">Welcome back! Here's your system overview.</p>
-            </div>
+            <PageHeader
+                title="Dashboard"
+                subtitle="Welcome back! Here's your system overview."
+            />
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat) => {
                     const Icon = stat.icon;
@@ -107,46 +82,29 @@ export default function AdminDashboard() {
                 })}
             </div>
 
-            {/* Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Quick Actions */}
                 <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="font-display">Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <button
-                            onClick={() => setIsUserModalOpen(true)}
-                            className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left"
-                        >
-                            <div className="bg-primary p-2 rounded-lg">
-                                <Plus className="w-5 h-5 text-white" />
-                            </div>
+                        <button onClick={() => setIsUserModalOpen(true)} className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left">
+                            <div className="bg-primary p-2 rounded-lg"><Plus className="w-5 h-5 text-white" /></div>
                             <div>
                                 <p className="font-semibold text-primary">Add User</p>
                                 <p className="text-xs text-gray-500">Create a new customer account</p>
                             </div>
                         </button>
-
-                        <button
-                            onClick={() => setIsOrderModalOpen(true)}
-                            className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left"
-                        >
-                            <div className="bg-accent-blue p-2 rounded-lg">
-                                <ShoppingBag className="w-5 h-5 text-white" />
-                            </div>
+                        <button onClick={() => setIsOrderModalOpen(true)} className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left">
+                            <div className="bg-accent-blue p-2 rounded-lg"><ShoppingBag className="w-5 h-5 text-white" /></div>
                             <div>
                                 <p className="font-semibold text-primary">Add Order</p>
                                 <p className="text-xs text-gray-500">Create a new order manually</p>
                             </div>
                         </button>
-
-                        <button
-                            onClick={() => setIsBillModalOpen(true)}
-                            className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left"
-                        >
-                            <div className="bg-green-500 p-2 rounded-lg">
-                                <FileText className="w-5 h-5 text-white" />
-                            </div>
+                        <button onClick={() => setIsBillModalOpen(true)} className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left">
+                            <div className="bg-green-500 p-2 rounded-lg"><FileText className="w-5 h-5 text-white" /></div>
                             <div>
                                 <p className="font-semibold text-primary">Add Bill</p>
                                 <p className="text-xs text-gray-500">Generate a new bill/invoice</p>
@@ -155,6 +113,7 @@ export default function AdminDashboard() {
                     </CardContent>
                 </Card>
 
+                {/* Recent Activity */}
                 <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="font-display">Recent Activity</CardTitle>
@@ -169,8 +128,8 @@ export default function AdminDashboard() {
                                             <p className="text-xs text-gray-500">{new Date(activity.date).toLocaleDateString()}</p>
                                         </div>
                                         <div className={`px-2 py-1 text-xs rounded-full ${activity.status === 'SUCCESS' ? 'bg-green-100 text-green-800' :
-                                            activity.status === 'FAILED' ? 'bg-red-100 text-red-800' :
-                                                'bg-yellow-100 text-yellow-800'
+                                                activity.status === 'FAILED' ? 'bg-red-100 text-red-800' :
+                                                    'bg-yellow-100 text-yellow-800'
                                             }`}>
                                             {activity.status}
                                         </div>
@@ -187,31 +146,9 @@ export default function AdminDashboard() {
                 </Card>
             </div>
 
-            {/* Modals */}
-            <UserModal
-                isOpen={isUserModalOpen}
-                onClose={(refresh) => {
-                    setIsUserModalOpen(false);
-                    if (refresh) fetchStats();
-                }}
-                user={null}
-            />
-            <OrderModal
-                isOpen={isOrderModalOpen}
-                onClose={(refresh) => {
-                    setIsOrderModalOpen(false);
-                    if (refresh) fetchStats();
-                }}
-                order={null}
-            />
-            <BillModal
-                isOpen={isBillModalOpen}
-                onClose={(refresh) => {
-                    setIsBillModalOpen(false);
-                    if (refresh) fetchStats();
-                }}
-                bill={null}
-            />
+            <UserModal isOpen={isUserModalOpen} onClose={(r) => { setIsUserModalOpen(false); if (r) refreshDashboard(); }} user={null} />
+            <OrderModal isOpen={isOrderModalOpen} onClose={(r) => { setIsOrderModalOpen(false); if (r) refreshDashboard(); }} order={null} />
+            <BillModal isOpen={isBillModalOpen} onClose={(r) => { setIsBillModalOpen(false); if (r) refreshDashboard(); }} bill={null} />
         </div>
     );
 }
