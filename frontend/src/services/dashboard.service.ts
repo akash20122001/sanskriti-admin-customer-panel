@@ -1,12 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
+import apiClient from '@/lib/axios';
 
 export interface AdminStats {
     stats: {
@@ -26,16 +18,7 @@ export interface AdminStats {
 
 export const dashboardService = {
     async getAdminStats(): Promise<AdminStats> {
-        const response = await fetch(`${API_URL}/dashboard/admin-stats`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to fetch dashboard stats');
-        }
-
-        const data = await response.json();
+        const { data } = await apiClient.get('/dashboard/admin-stats');
         return data.data;
     },
 };

@@ -124,11 +124,18 @@ export default function OrderModal({ isOpen, onClose, order }: OrderModalProps) 
 
     const onSubmit = async (data: OrderFormValues) => {
         try {
+            const payload = {
+                ...data,
+                orderDate: data.orderDate
+                    ? (data.orderDate.includes('T') ? data.orderDate : `${data.orderDate}T00:00:00`)
+                    : undefined
+            };
+
             if (isEditMode) {
-                await orderService.updateOrder(order.id, data);
+                await orderService.updateOrder(order.id, payload);
                 toast.success('Order updated successfully');
             } else {
-                await orderService.createOrder(data);
+                await orderService.createOrder(payload);
                 toast.success('Order created successfully');
             }
 

@@ -1,42 +1,14 @@
 import type { User } from '@/types';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Helper to get auth headers
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
+import apiClient from '@/lib/axios';
 
 export const userService = {
     async getAllUsers(): Promise<User[]> {
-        const response = await fetch(`${API_URL}/users`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to fetch users');
-        }
-
-        const data = await response.json();
+        const { data } = await apiClient.get('/users');
         return data.data;
     },
 
     async getUserById(id: string): Promise<User> {
-        const response = await fetch(`${API_URL}/users/${id}`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to fetch user');
-        }
-
-        const data = await response.json();
+        const { data } = await apiClient.get(`/users/${id}`);
         return data.data;
     },
 
@@ -55,18 +27,7 @@ export const userService = {
         pin?: string;
         gst?: string;
     }): Promise<User> {
-        const response = await fetch(`${API_URL}/users`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(userData),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to create user');
-        }
-
-        const data = await response.json();
+        const { data } = await apiClient.post('/users', userData);
         return data.data;
     },
 
@@ -88,30 +49,11 @@ export const userService = {
             gst?: string | null;
         }
     ): Promise<User> {
-        const response = await fetch(`${API_URL}/users/${id}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(userData),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to update user');
-        }
-
-        const data = await response.json();
+        const { data } = await apiClient.put(`/users/${id}`, userData);
         return data.data;
     },
 
     async deleteUser(id: string): Promise<void> {
-        const response = await fetch(`${API_URL}/users/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to delete user');
-        }
+        await apiClient.delete(`/users/${id}`);
     },
 };

@@ -1,12 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
+import apiClient from '@/lib/axios';
 
 export interface Settings {
     id: string;
@@ -19,14 +11,8 @@ export interface Settings {
 
 export const settingsService = {
     async getSettings(): Promise<Settings> {
-        const response = await fetch(`${API_URL}/settings`, {
-            headers: getAuthHeaders(),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to fetch settings');
-        }
-        const result = await response.json();
-        return result.data;
+        const { data } = await apiClient.get('/settings');
+        return data.data;
     },
 
     async updateSettings(data: {
@@ -35,15 +21,7 @@ export const settingsService = {
         sellingPlatforms?: string[];
         deliveryPartners?: string[];
     }): Promise<Settings> {
-        const response = await fetch(`${API_URL}/settings`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) {
-            throw new Error('Failed to update settings');
-        }
-        const result = await response.json();
-        return result.data;
+        const { data: responseData } = await apiClient.put('/settings', data);
+        return responseData.data;
     },
 };

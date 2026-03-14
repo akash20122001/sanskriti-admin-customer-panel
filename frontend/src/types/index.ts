@@ -34,7 +34,7 @@ export interface AuthResponse {
 
 // Order Types
 export type Currency = 'USD' | 'INR';
-export type Platform = string; // Changed from enum to string for dynamic platforms
+export type Platform = string; // Dynamic platforms from settings
 export type OrderStatus = 'IN_PROGRESS' | 'SHIPPED' | 'RTO';
 
 export interface Order {
@@ -44,29 +44,37 @@ export interface Order {
     skuId: string;
     price: number;
     currency: Currency;
-    platform: string; // Platform name from settings
+    platform: string;
     status: OrderStatus;
-    deliveryPartner?: string; // NEW: Delivery partner name
-    trackingId?: string; // NEW: Tracking ID
-    orderDate: string; // NEW: Date of the order
+    deliveryPartner?: string;
+    trackingId?: string;
+    orderDate: string;
     createdAt: string;
     updatedAt: string;
 }
 
 // Transaction Types
 export type TransactionType = 'CREDIT' | 'DEBIT';
+export type TransactionStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
 
 export interface Transaction {
     id: string;
     transactionId: string;
     userId: string;
-    userName?: string;
     type: TransactionType;
     amount: number;
+    status: TransactionStatus;         // was missing — used in admin & customer Transactions page
+    paymentMethod: string;             // was missing — used in admin Transactions page
     balanceAfter: number;
-    description: string;
+    description: string | null;        // nullable — backend can return null
     orderId?: string;
     createdAt: string;
+    // Populated only in admin view (joined from user table)
+    user?: {
+        userId: string;
+        name: string;
+        role: string;
+    };
 }
 
 // Bill/Invoice Types
@@ -86,8 +94,8 @@ export interface Bill {
     pin: string;
     gst: string;
 
-    // Payment (Fixed to Razorpay Wallet)
-    paymentMode: string; // Always "Razorpay Wallet"
+    // Payment
+    paymentMode: string;
 
     // Product Details
     productName: string;
@@ -96,7 +104,7 @@ export interface Bill {
     price: number;
     currency: Currency;
     shippingCharge: number;
-    packagingCharge: number; // NEW
+    packagingCharge: number;
     taxPercent: number;
 
     // Calculated
@@ -108,6 +116,39 @@ export interface Bill {
     // Timestamps
     createdAt: string;
     updatedAt: string;
+}
+
+// Dashboard Types
+export interface AdminDashboardStats {
+    stats: {
+        totalUsers: number;
+        activeUsers: number;
+        totalTransactions: number;
+        totalRevenue: number;
+    };
+    recentActivity: {
+        id: string;
+        type: string;
+        message: string;
+        date: string;
+        status: string;
+    }[];
+}
+
+// Renamed from DashboardStats to be specific — kept for backward compat
+export interface DashboardStats {
+    totalUsers: number;
+    totalOrders: number;
+    totalWalletBalance: number;
+    totalRevenue: number;
+}
+
+// NEW: Customer-specific dashboard summary
+export interface CustomerDashboardStats {
+    walletBalance: number;
+    totalTransactions: number;
+    totalOrders: number;
+    totalBills: number;
 }
 
 // API Response Types
@@ -125,12 +166,4 @@ export interface PaginatedResponse<T> {
         total: number;
         totalPages: number;
     };
-}
-
-// Dashboard Stats
-export interface DashboardStats {
-    totalUsers: number;
-    totalOrders: number;
-    totalWalletBalance: number;
-    totalRevenue: number;
 }

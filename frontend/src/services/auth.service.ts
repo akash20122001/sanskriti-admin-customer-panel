@@ -1,4 +1,5 @@
 import type { LoginCredentials, AuthResponse, User } from '@/types';
+import apiClient from '@/lib/axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -65,21 +66,8 @@ export const authService = {
     if (!token) return null;
 
     try {
-      const response = await fetch(`${API_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        cache: 'no-store',
-      });
-
-      if (!response.ok) {
-        this.logout();
-        return null;
-      }
-
-      const result = await response.json();
-      // Spring Boot directly returns the UserResponse object in .data
-      return result.data;
+      const { data } = await apiClient.get('/auth/me');
+      return data.data;
     } catch (error) {
       console.error('Failed to get current user:', error);
       this.logout();
