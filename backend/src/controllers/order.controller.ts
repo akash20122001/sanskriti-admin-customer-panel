@@ -147,6 +147,25 @@ export const orderController = {
         }
     },
 
+    // Delete order (admin only)
+    async deleteOrder(req: Request, res: Response): Promise<any> {
+        try {
+            const id = req.params.id as string;
+
+            const existingOrder = await prisma.order.findUnique({ where: { id } });
+            if (!existingOrder) {
+                return res.status(404).json({ error: 'Order not found' });
+            }
+
+            await prisma.order.delete({ where: { id } });
+
+            res.json({ message: 'Order deleted successfully' });
+        } catch (error) {
+            console.error('Delete order error:', error);
+            res.status(500).json({ error: 'Failed to delete order' });
+        }
+    },
+
     // Get customer's orders (customer only - returns their own orders)
     async getCustomerOrders(req: Request, res: Response): Promise<any> {
         try {

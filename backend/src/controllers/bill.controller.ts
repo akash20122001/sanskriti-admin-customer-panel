@@ -224,6 +224,50 @@ export const billController = {
         }
     },
 
+    // Delete bill (admin only)
+    async deleteBill(req: Request, res: Response): Promise<any> {
+        try {
+            const id = req.params.id as string;
+
+            const existingBill = await prisma.bill.findUnique({ where: { id } });
+            if (!existingBill) {
+                return res.status(404).json({ error: 'Bill not found' });
+            }
+
+            // Refund user's wallet balance (only if bill is linked to a user)
+            if (existingBill.userId) {
+                const user = await prisma.user.findUnique({ where: { userId: existingBill.userId } });
+                if (user) {
+                    await prisma.user.update({
+                        where: { userId: user.userId },
+                        data: { walletBalance: user.walletBalance + existingBill.payableAmount },
+                    });
+
+                    // Log a reversal CREDIT transaction for audit trail
+                    await prisma.transaction.create({
+                        data: {
+                            transactionId: `REV-${existingBill.transactionId}`,
+                            userId: user.userId,
+                            amount: existingBill.payableAmount,
+                            type: 'CREDIT',
+                            status: 'SUCCESS',
+                            paymentMethod: 'RAZORPAY_WALLET',
+                            description: `Reversal of bill ${existingBill.invoiceNumber ?? existingBill.transactionId} (bill deleted)`,
+                        },
+                    });
+                }
+            }
+
+            await prisma.bill.delete({ where: { id } });
+
+            res.json({ message: 'Bill deleted and amount refunded to user wallet successfully' });
+        } catch (error) {
+            console.error('Delete bill error:', error);
+            res.status(500).json({ error: 'Failed to delete bill' });
+        }
+    },
+
+
     // Get customer's bills
     async getCustomerBills(req: Request, res: Response): Promise<any> {
         try {

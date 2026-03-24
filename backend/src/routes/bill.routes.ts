@@ -15,5 +15,6 @@ router.use(authenticateToken, requireAdmin);
 router.get('/', billController.getAllBills);
 router.get('/:id', billController.getBillById);
 router.post('/', billController.createBill);
+router.delete('/:id', billController.deleteBill);
 
 export default router;

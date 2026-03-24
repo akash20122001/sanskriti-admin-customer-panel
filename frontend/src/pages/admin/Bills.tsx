@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Download, FileText, Calendar } from 'lucide-react';
+import { Plus, Search, Download, Trash2, FileText, Calendar } from 'lucide-react';
 import BillModal from '@/components/BillModal';
 
 export default function BillsPage() {
@@ -16,6 +16,8 @@ export default function BillsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+    const [deletingBillId, setDeletingBillId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     // Fetch bills
     const fetchBills = async () => {
@@ -72,6 +74,26 @@ export default function BillsPage() {
         setSelectedBill(null);
         if (refreshData) {
             fetchBills();
+        }
+    };
+
+    const handleDeleteBill = async (id: string) => {
+        if (confirmDeleteId !== id) {
+            setConfirmDeleteId(id);
+            return;
+        }
+        try {
+            setDeletingBillId(id);
+            await billService.deleteBill(id);
+            toast.success('Bill deleted successfully');
+            setBills((prev) => prev.filter((b) => b.id !== id));
+            setConfirmDeleteId(null);
+        } catch (error) {
+            toast.error('Failed to delete bill', {
+                description: (error as Error).message,
+            });
+        } finally {
+            setDeletingBillId(null);
         }
     };
 
@@ -276,6 +298,36 @@ export default function BillsPage() {
                                                             className="text-green-600 hover:text-green-700 hover:bg-green-50"
                                                         >
                                                             <Download className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
+                                                    {confirmDeleteId === bill.id ? (
+                                                        <>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteBill(bill.id)}
+                                                                disabled={deletingBillId === bill.id}
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs px-2"
+                                                            >
+                                                                {deletingBillId === bill.id ? 'Deleting...' : 'Confirm'}
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => setConfirmDeleteId(null)}
+                                                                className="text-gray-500 hover:text-gray-700 text-xs px-2"
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteBill(bill.id)}
+                                                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     )}
                                                 </div>

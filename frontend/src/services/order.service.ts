@@ -87,6 +87,18 @@ export const orderService = {
         return data.order;
     },
 
+    async deleteOrder(id: string): Promise<void> {
+        const response = await fetch(`${API_URL}/orders/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete order');
+        }
+    },
+
     async getCustomerOrders(): Promise<any> {
         const response = await fetch(`${API_URL}/orders/customer/my-orders`, {
             headers: getAuthHeaders(),

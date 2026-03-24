@@ -63,6 +63,18 @@ export const billService = {
         return `${API_URL.replace('/api', '')}${bill.invoiceUrl}`;
     },
 
+    async deleteBill(id: string): Promise<void> {
+        const response = await fetch(`${API_URL}/bills/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete bill');
+        }
+    },
+
     async getCustomerBills(): Promise<any> {
         const response = await fetch(`${API_URL}/bills/customer/my-bills`, {
             headers: getAuthHeaders(),

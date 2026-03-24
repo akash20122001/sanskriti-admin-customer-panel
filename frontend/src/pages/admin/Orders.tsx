@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Pencil, ShoppingCart, Package } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, ShoppingCart, Package } from 'lucide-react';
 import OrderModal from '@/components/OrderModal';
 
 export default function OrdersPage() {
@@ -16,6 +16,8 @@ export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     // Fetch orders
     const fetchOrders = async () => {
@@ -66,6 +68,26 @@ export default function OrdersPage() {
         setSelectedOrder(null);
         if (refreshData) {
             fetchOrders();
+        }
+    };
+
+    const handleDeleteOrder = async (id: string) => {
+        if (confirmDeleteId !== id) {
+            setConfirmDeleteId(id);
+            return;
+        }
+        try {
+            setDeletingOrderId(id);
+            await orderService.deleteOrder(id);
+            toast.success('Order deleted successfully');
+            setOrders((prev) => prev.filter((o) => o.id !== id));
+            setConfirmDeleteId(null);
+        } catch (error) {
+            toast.error('Failed to delete order', {
+                description: (error as Error).message,
+            });
+        } finally {
+            setDeletingOrderId(null);
         }
     };
 
@@ -308,6 +330,36 @@ export default function OrdersPage() {
                                                     >
                                                         <Pencil className="w-4 h-4" />
                                                     </Button>
+                                                    {confirmDeleteId === order.id ? (
+                                                        <>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteOrder(order.id)}
+                                                                disabled={deletingOrderId === order.id}
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs px-2"
+                                                            >
+                                                                {deletingOrderId === order.id ? 'Deleting...' : 'Confirm'}
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => setConfirmDeleteId(null)}
+                                                                className="text-gray-500 hover:text-gray-700 text-xs px-2"
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteOrder(order.id)}
+                                                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
 
                                                 </div>
                                             </td>
